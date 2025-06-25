@@ -21,9 +21,13 @@ const Home = () => {
   return (
     <div>
       <h2>Catalogue de events</h2>
-      {events.map((event) => (
-        <EventCard key={event.id} event={event} />
-      ))}
+      <div className="row">
+        {events.map((event) => (
+          <div key={event.id} className="col-md-4 mb-4 d-flex">
+            <EventCard event={event} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

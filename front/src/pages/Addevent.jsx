@@ -8,7 +8,8 @@ const Addevent = () => {
     title: "",
     author: "",
     genre: "",
-    date: "",
+    date_debut: "",
+    date_fin: "",
     description: "",
     cover_image: "",
   });
@@ -52,12 +53,18 @@ const Addevent = () => {
           onChange={handleChange}
         />
         <input
-          className="form-control mb-2"
-          name="date"
-          placeholder="Date (YYYY-MM-DD)"
           type="date"
+          className="form-control mb-2"
+          name="date_debut"
+          value={event.date_debut}
           onChange={handleChange}
-          required
+        />
+        <input
+          type="date"
+          className="form-control mb-2"
+          name="date_fin"
+          value={event.date_fin}
+          onChange={handleChange}
         />
         <textarea
           className="form-control mb-2"
