@@ -21,6 +21,15 @@ const authService = {
   isAuthenticated: () => {
     return !!localStorage.getItem("token");
   },
+
+  me: async () => {
+    const res = await api.get("/me");
+    return res.data;
+  },
+
+  changePassword: async (newPassword) => {
+    return api.post("/change-password", { new_password: newPassword });
+  },
 };
 
 export default authService;

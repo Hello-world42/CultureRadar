@@ -13,6 +13,13 @@ const eventservice = {
     const res = await api.get(`/events/${id}`);
     return res.data;
   },
+
+  participate: async (eventId) => {
+    return api.post(`/events/${eventId}/participate`);
+  },
+  unparticipate: async (eventId) => {
+    return api.post(`/events/${eventId}/unparticipate`);
+  },
 };
 
 export default eventservice;

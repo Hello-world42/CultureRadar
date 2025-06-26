@@ -2,11 +2,22 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db  # Import db from extensions
 
 
+participants = db.Table(
+    "participants",
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("event_id", db.Integer, db.ForeignKey("event.id")),
+)
+
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+
+    events_participated = db.relationship(
+        "event", secondary=participants, backref="participants"
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

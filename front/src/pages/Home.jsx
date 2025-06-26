@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import eventservice from "../services/eventService";
 import EventCard from "../components/EventCard";
 
-const Home = () => {
+const Home = ({ user }) => {
   const [events, setevents] = useState([]);
 
   useEffect(() => {
@@ -14,17 +14,16 @@ const Home = () => {
         console.error("Erreur chargement des events :", error);
       }
     };
-
     fetchevents();
   }, []);
 
   return (
     <div>
-      <h2>Catalogue de events</h2>
+      <h2 style={{ marginTop: "30px", marginBottom: "40px" }}>Catalogue de events</h2>
       <div className="row">
         {events.map((event) => (
-          <div key={event.id} className="col-md-4 mb-4 d-flex">
-            <EventCard event={event} />
+          <div key={event.id} className="col-md-4 mb-3 d-flex">
+            <EventCard event={event} user={user} />
           </div>
         ))}
       </div>

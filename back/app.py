@@ -4,11 +4,13 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from config import Config
 from routes.events import events_bp
-from extensions import db  # Import db from extensions
+from extensions import db
+from datetime import timedelta
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=72)
 # Initialize extensions
 db.init_app(app)
 migrate = Migrate(app, db)

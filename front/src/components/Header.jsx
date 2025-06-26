@@ -7,7 +7,7 @@ const Header = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/");
+    window.location.href = "/login";
   };
 
   return (
@@ -31,6 +31,11 @@ const Header = () => {
                     className="text-white text-decoration-none"
                   >
                     Ajouter un évent
+                  </Link>
+                </li>
+                <li className="me-3" >
+                  <Link to="/profile" className="text-white text-decoration-none">
+                    Profil
                   </Link>
                 </li>
                 <li>

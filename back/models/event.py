@@ -1,5 +1,7 @@
 from extensions import db
 from datetime import date
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from models.user import User, participants
 
 
 class event(db.Model):

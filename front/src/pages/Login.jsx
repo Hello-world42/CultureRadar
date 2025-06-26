@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import authService from "../services/authService";
 
 const Login = () => {
@@ -46,6 +46,10 @@ const Login = () => {
           Se connecter
         </button>
       </form>
+      <div className="mt-3">
+        <span>Pas de compte ? </span>
+        <Link to="/register">Créer un compte</Link>
+      </div>
     </div>
   );
 };
