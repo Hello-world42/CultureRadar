@@ -1,62 +1,38 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import authService from "../services/authService";
+import RegisterStep1 from "./RegisterStep1";
+import RegisterStep2 from "./RegisterStep2";
 
 const Register = () => {
-  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [userData, setUserData] = useState({
     username: "",
     email: "",
     password: "",
+    preferences: [],
   });
 
-  const handleChange = (e) => {
-    setUserData({ ...userData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await authService.register(userData);
-      navigate("/login");
-    } catch (error) {
-      alert(
-        "Erreur lors de l'inscription : " + (error.msg || "Vérifiez les champs")
-      );
-    }
-  };
+  const [errors, setErrors] = useState({});
 
   return (
     <div>
-      <h2>Inscription</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          className="form-control mb-2"
-          name="username"
-          placeholder="Nom d'utilisateur"
-          onChange={handleChange}
-          required
+      {step === 1 && (
+        <RegisterStep1
+          userData={userData}
+          setUserData={setUserData}
+          setStep={setStep}
+          errors={errors}
+          setErrors={setErrors}
         />
-        <input
-          className="form-control mb-2"
-          name="email"
-          type="email"
-          placeholder="Email"
-          onChange={handleChange}
-          required
+      )}
+      {step === 2 && (
+        <RegisterStep2
+          userData={userData}
+          setUserData={setUserData}
+          setStep={setStep}
+          errors={errors}
+          setErrors={setErrors}
         />
-        <input
-          className="form-control mb-2"
-          name="password"
-          type="password"
-          placeholder="Mot de passe"
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" className="btn btn-success">
-          S'inscrire
-        </button>
-      </form>
+      )}
     </div>
   );
 };

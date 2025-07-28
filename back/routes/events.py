@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
-from extensions import db
-from models.event import event
-from models.user import User
+from back.extensions import db
+from back.models.event import event
+from back.models.user import User
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 
@@ -15,14 +15,21 @@ def add_event():
     date_fin = None
     if data.get("date_fin"):
         date_fin = datetime.strptime(data["date_fin"], "%Y-%m-%d").date()
+    genres = data.get("genres", [])
+    if isinstance(genres, list):
+        genres_str = ",".join(genres)
+    elif isinstance(genres, str):
+        genres_str = genres
+    else:
+        genres_str = ""
     new_event = event(
         title=data["title"],
         author=data["author"],
         date_debut=date_debut,
         date_fin=date_fin,
-        genre=data.get("genre"),
         description=data.get("description"),
         cover_image=data.get("cover_image"),
+        genres=genres_str,
     )
     db.session.add(new_event)
     db.session.commit()
@@ -30,9 +37,18 @@ def add_event():
 
 
 @events_bp.route("/events", methods=["GET"])
+@jwt_required()
 def get_events():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    user_prefs = user.preferences.split(",") if user.preferences else []
     events = event.query.all()
-    return jsonify([e.to_dict() for e in events]), 200
+    filtered = []
+    for ev in events:
+        ev_genres = ev.genres.split(",") if ev.genres else []
+        if ev.author == user.username or any(g in user_prefs for g in ev_genres):
+            filtered.append(ev.to_dict())
+    return jsonify(filtered)
 
 
 @events_bp.route("/events/<int:id>", methods=["DELETE"])
@@ -49,7 +65,6 @@ def get_event(event_id):
     if not event_instance:
         return {"msg": "Événement non trouvé"}, 404
     event_dict = event_instance.to_dict()
-    # Ajoute la liste des participants (usernames)
     event_dict["participants"] = [u.username for u in event_instance.participants]
     return event_dict, 200
 

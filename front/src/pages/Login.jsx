@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authService from "../services/authService";
 
-const Login = () => {
+const Login = ({ setUser }) => {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({
     username: "",
@@ -17,6 +17,8 @@ const Login = () => {
     e.preventDefault();
     try {
       await authService.login(credentials);
+      const user = await authService.me();
+      setUser(user);
       navigate("/");
     } catch (error) {
       alert("Erreur de connexion : " + (error.msg || "Identifiants invalides"));
@@ -49,6 +51,9 @@ const Login = () => {
       <div className="mt-3">
         <span>Pas de compte ? </span>
         <Link to="/register">Créer un compte</Link>
+      </div>
+      <div className="mt-2">
+        <Link to="/forgot-password">Mot de passe oublié&nbsp;?</Link>
       </div>
     </div>
   );

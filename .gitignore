@@ -29,6 +29,10 @@ __pycache__/
 *.pyc
 instance/
 migrations/
+venv/
+venv311/
+back/venv/
+back/venv311/
 
 # dotenv environment variable files
 .env

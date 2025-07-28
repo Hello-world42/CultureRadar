@@ -2,9 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import eventservice from "../services/eventService";
 
-const CARD_WIDTH = 400;   // largeur fixe en px
-const CARD_HEIGHT = 370;  // hauteur fixe en px
-const IMG_HEIGHT = 140;   // hauteur fixe pour l'image
+const CARD_WIDTH = 400;
+const CARD_HEIGHT = 370;
+const IMG_HEIGHT = 140;
 
 const EventCard = ({ event, user }) => {
   const isParticipating = user?.events_participated?.some(ev => ev.id === event.id);
@@ -13,7 +13,7 @@ const EventCard = ({ event, user }) => {
     try {
       await eventservice.participate(eventId);
       alert("Participation enregistrée !");
-      window.location.reload(); // Pour rafraîchir l'état
+      window.location.reload();
     } catch (e) {
       alert("Erreur lors de la participation.");
     }
@@ -23,7 +23,7 @@ const EventCard = ({ event, user }) => {
     try {
       await eventservice.unparticipate(eventId);
       alert("Participation annulée !");
-      window.location.reload(); // Pour rafraîchir l'état
+      window.location.reload();
     } catch (e) {
       alert("Erreur lors de l'annulation.");
     }

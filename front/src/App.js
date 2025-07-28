@@ -9,9 +9,13 @@ import Addevent from "./pages/Addevent";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import About from "./pages/About";
+import ConfirmationSuccess from "./pages/ConfirmationSuccess";
 import authService from "./services/authService";
 import RequireAuth from "./components/RequireAuth";
 import "./styles/App.css";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import CheckEmail from "./pages/CheckEmail";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -25,16 +29,16 @@ function App() {
         .me()
         .then(setUser)
         .catch(() => setUser(null))
-        .finally(() => setLoading(false)); // Fin du chargement
+        .finally(() => setLoading(false));
     } else {
-      setLoading(false); // Pas de token, fin du chargement
+      setLoading(false);
     }
   }, []);
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
   if (loading) {
-    return <div>Chargement...</div>; // Ou un spinner
+    return <div>Chargement...</div>;
   }
 
   return (
@@ -44,7 +48,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
-          {/* Toutes les routes privées */}
+          {}
           <Route
             path="/"
             element={
@@ -65,19 +69,19 @@ function App() {
             path="/add-event"
             element={
               <RequireAuth user={user}>
-                <Addevent />
+                <Addevent user={user} />
               </RequireAuth>
             }
           />
           <Route
             path="/profile"
-            element={
-              <RequireAuth user={user}>
-                <Profile user={user} />
-              </RequireAuth>
-            }
+            element={<Profile user={user} />}
           />
           <Route path="/about" element={<About />} />
+          <Route path="/confirmation-success" element={<ConfirmationSuccess />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/check-email" element={<CheckEmail />} />
         </Routes>
       </main>
       {!isAuthPage && user && <Footer />}

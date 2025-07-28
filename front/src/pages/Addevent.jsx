@@ -2,17 +2,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import eventservice from "../services/eventService";
 
-const Addevent = () => {
+const Addevent = ({ user }) => {
   const navigate = useNavigate();
+
   const [event, setevent] = useState({
     title: "",
-    author: "",
-    genre: "",
     date_debut: "",
     date_fin: "",
     description: "",
     cover_image: "",
   });
+  const allGenres = ["Mode", "Musique", "Théatre"];
+  const [genres, setGenres] = useState([]);
 
   const handleChange = (e) => {
     setevent({ ...event, [e.target.name]: e.target.value });
@@ -21,7 +22,15 @@ const Addevent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await eventservice.createevent(event);
+      await eventservice.createevent({
+        title: event.title,
+        author: user.username,
+        genres,
+        description: event.description,
+        cover_image: event.cover_image,
+        date_debut: event.date_debut,
+        date_fin: event.date_fin,
+      });
       navigate("/");
     } catch (error) {
       alert("Erreur lors de l'ajout du event.");
@@ -30,7 +39,7 @@ const Addevent = () => {
 
   return (
     <div>
-      <h2>Ajouter un nouveau event</h2>
+      <h2>Ajouter un nouvel événement</h2>
       <form onSubmit={handleSubmit}>
         <input
           className="form-control mb-2"
@@ -38,19 +47,6 @@ const Addevent = () => {
           placeholder="Titre"
           onChange={handleChange}
           required
-        />
-        <input
-          className="form-control mb-2"
-          name="author"
-          placeholder="Auteur"
-          onChange={handleChange}
-          required
-        />
-        <input
-          className="form-control mb-2"
-          name="genre"
-          placeholder="Genre"
-          onChange={handleChange}
         />
         <input
           type="date"
@@ -78,6 +74,31 @@ const Addevent = () => {
           placeholder="URL de la couverture"
           onChange={handleChange}
         />
+        <div className="mb-2">
+          <label>
+            <strong>Genres :</strong>
+          </label>
+          {allGenres.map((g) => (
+            <div key={g} className="form-check form-check-inline">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id={g}
+                checked={genres.includes(g)}
+                onChange={() =>
+                  setGenres((genres) =>
+                    genres.includes(g)
+                      ? genres.filter((x) => x !== g)
+                      : [...genres, g]
+                  )
+                }
+              />
+              <label className="form-check-label" htmlFor={g}>
+                {g}
+              </label>
+            </div>
+          ))}
+        </div>
         <button type="submit" className="btn btn-primary">
           Ajouter
         </button>

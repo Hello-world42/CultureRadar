@@ -6,8 +6,14 @@ const Profile = ({ user }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [message, setMessage] = useState("");
+  const [editPrefs, setEditPrefs] = useState(false);
+  const allOptions = ["Mode", "Musique", "Théatre"];
+  const [prefs, setPrefs] = useState(user.preferences ? user.preferences.split(",") : []);
+  const [prefsError, setPrefsError] = useState("");
 
   if (!user) return <p>Chargement du profil...</p>;
+
+  console.log("USER DANS PROFILE :", user);
 
   const handleReset = async (e) => {
     e.preventDefault();
@@ -30,9 +36,74 @@ const Profile = ({ user }) => {
   return (
     <div className="card mx-auto mt-5" style={{ maxWidth: "400px" }}>
       <div className="card-body">
-        <h3 className="card-title mb-4">Mon profil</h3>
+        <h3 className="card-title mb-4">Profil</h3>
         <p><strong>Nom d'utilisateur :</strong> {user.username}</p>
         <p><strong>Email :</strong> {user.email}</p>
+        <p>
+          <strong>Préférences :</strong>{" "}
+          {user.preferences
+            ? user.preferences.split(",").join(", ")
+            : <span style={{ color: "#888" }}>Aucune</span>}
+        </p>
+        <button
+          className="btn btn-outline-secondary btn-sm mb-3"
+          onClick={() => setEditPrefs(true)}
+        >
+          Changer mes préférences
+        </button>
+        {editPrefs && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setPrefsError("");
+              if (prefs.length === 0) {
+                setPrefsError("Veuillez sélectionner au moins une préférence.");
+                return;
+              }
+              try {
+                await authService.updatePreferences(prefs);
+                setEditPrefs(false);
+                window.location.reload();
+              } catch {
+                setPrefsError("Erreur lors de la mise à jour.");
+              }
+            }}
+            className="mb-3"
+          >
+            <div className="mb-2">
+              {allOptions.map(opt => (
+                <div key={opt} className="form-check form-check-inline">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id={opt}
+                    checked={prefs.includes(opt)}
+                    onChange={() => {
+                      setPrefsError("");
+                      setPrefs(prefs =>
+                        prefs.includes(opt)
+                          ? prefs.length > 1 ? prefs.filter(o => o !== opt) : prefs
+                          : [...prefs, opt]
+                      );
+                    }}
+                  />
+                  <label className="form-check-label" htmlFor={opt}>{opt}</label>
+                </div>
+              ))}
+            </div>
+            <button className="btn btn-primary btn-sm" type="submit">
+              Enregistrer
+            </button>
+            <button
+              type="button"
+              className="btn btn-link btn-sm"
+              onClick={() => setEditPrefs(false)}
+            >
+              Annuler
+            </button>
+            {prefsError && <div className="text-danger mt-2">{prefsError}</div>}
+          </form>
+        )}
         <p>
           <strong>Mot de passe :</strong>{" "}
           <input type="password" value="password" disabled style={{ width: "120px" }} />

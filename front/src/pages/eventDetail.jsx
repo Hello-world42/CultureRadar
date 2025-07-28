@@ -51,9 +51,8 @@ const EventDetail = ({ user }) => {
       <div className="card-body d-flex flex-column">
         <h2 className="card-title">{event.title}</h2>
         <p className="card-text"><strong>Auteur :</strong> {event.author}</p>
-        <p className="card-text"><strong>Genre :</strong> {event.genre}</p>
-        <p className="card-text">
-          <strong>Date :</strong>{" "}
+        <p className="card-text"><strong>Genres :</strong> {event.genres ? event.genres.split(",").join(", ") : "Aucun"}</p>
+        <p className="card-text"><strong>Date :</strong>{" "}
           {event.date_fin
             ? <>Du {event.date_debut} au {event.date_fin}</>
             : <>Le {event.date_debut}</>
