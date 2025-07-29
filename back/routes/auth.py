@@ -46,6 +46,9 @@ def register():
         is_confirmed=False,
         confirmation_token=token,
         preferences=prefs_str,
+        code_postal=data.get("code_postal"),
+        latitude=data.get("latitude"),
+        longitude=data.get("longitude"),
     )
     user.set_password(data["password"])
     db.session.add(user)
@@ -178,13 +181,22 @@ def reset_password(token):
 @auth_bp.route("/update-preferences", methods=["POST"])
 @jwt_required()
 def update_preferences():
+    import re
     data = request.get_json()
     prefs = data.get("preferences", [])
+    code_postal = data.get("code_postal")
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
     if not isinstance(prefs, list) or not prefs:
         return jsonify({"msg": "Au moins une préférence est requise."}), 400
     prefs_str = ",".join(prefs)
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     user.preferences = prefs_str
+    if code_postal and re.match(r"^\d{5}$", code_postal):
+        user.code_postal = code_postal
+        if latitude and longitude:
+            user.latitude = latitude
+            user.longitude = longitude
     db.session.commit()
     return jsonify({"msg": "Préférences mises à jour."}), 200

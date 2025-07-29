@@ -18,6 +18,9 @@ class User(db.Model):
     confirmation_token = db.Column(db.String(128), nullable=True)
     reset_token = db.Column(db.String(128), nullable=True)
     preferences = db.Column(db.String(256), nullable=True)
+    code_postal = db.Column(db.String(10), nullable=True)
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
 
     events_participated = db.relationship(
         "event", secondary=participants, backref="participants"
@@ -35,4 +38,5 @@ class User(db.Model):
             "username": self.username,
             "email": self.email,
             "preferences": self.preferences,
+            "code_postal": self.code_postal,
         }

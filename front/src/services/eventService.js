@@ -5,8 +5,10 @@ const eventservice = {
     const res = await api.post("/events", eventData);
     return res.data;
   },
-  getAllevents: async () => {
-    const res = await api.get("/events");
+  getAllevents: async (distance = 0, page = 1, size = 30) => {
+    const res = await api.get("/events", {
+      params: { distance, page, size },
+    });
     return res.data;
   },
   geteventById: async (id) => {
@@ -19,6 +21,14 @@ const eventservice = {
   },
   unparticipate: async (eventId) => {
     return api.post(`/events/${eventId}/unparticipate`);
+  },
+  getAllGenres: async () => {
+    const res = await api.get("/events/genres");
+    return res.data.genres;
+  },
+  getSuggestions: async () => {
+    const res = await api.get("/events/suggestions");
+    return res.data;
   },
 };
 

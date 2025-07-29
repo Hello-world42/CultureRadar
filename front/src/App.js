@@ -33,7 +33,7 @@ function App() {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [location.pathname]);
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
 
@@ -42,9 +42,9 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="App d-flex flex-column min-vh-100">
       {!isAuthPage && user && <Header user={user} setUser={setUser} />}
-      <main className="container mt-4">
+      <main className="container mt-4 flex-grow-1">
         <Routes>
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />

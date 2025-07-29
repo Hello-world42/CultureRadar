@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import eventservice from "../services/eventService";
+import { formatEventDate } from "../utils/dateFormat";
 
 const CARD_WIDTH = 400;
 const CARD_HEIGHT = 370;
@@ -60,10 +61,7 @@ const EventCard = ({ event, user }) => {
         <p className="card-text mb-1">Auteur : {event.author}</p>
         <p className="card-text mb-2" style={{ fontSize: "0.95em" }}>
           <strong>Date :</strong>{" "}
-          {event.date_fin
-            ? <>Du {event.date_debut} au {event.date_fin}</>
-            : <>Le {event.date_debut}</>
-          }
+          {formatEventDate(event.date_debut, event.date_fin)}
         </p>
         <Link to={`/events/${event.id}`} className="btn btn-primary w-100 mb-2 mt-auto">
           Voir les détails

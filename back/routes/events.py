@@ -1,9 +1,19 @@
+import math
+import random
 from flask import Blueprint, jsonify, request
 from back.extensions import db
 from back.models.event import event
 from back.models.user import User
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 events_bp = Blueprint("events", __name__)
 
@@ -42,13 +52,34 @@ def get_events():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     user_prefs = user.preferences.split(",") if user.preferences else []
+    max_distance = float(request.args.get("distance", 0))
+    page = int(request.args.get("page", 1))
+    size = int(request.args.get("size", 30))
+    user_lat, user_lon = user.latitude, user.longitude
+
     events = event.query.all()
     filtered = []
     for ev in events:
         ev_genres = ev.genres.split(",") if ev.genres else []
         if ev.author == user.username or any(g in user_prefs for g in ev_genres):
-            filtered.append(ev.to_dict())
-    return jsonify(filtered)
+            if ev.latitude and ev.longitude and user_lat and user_lon:
+                dist = haversine(user_lat, user_lon, ev.latitude, ev.longitude)
+                if max_distance == 0 or dist <= max_distance:
+                    filtered.append(ev.to_dict())
+
+    total = len(filtered)
+    totalPages = max(1, (total + size - 1) // size)
+    start = (page - 1) * size
+    end = start + size
+    paginated = filtered[start:end]
+
+    return jsonify({
+        "events": paginated,
+        "totalPages": totalPages,
+        "page": page,
+        "size": size,
+        "total": total
+    })
 
 
 @events_bp.route("/events/<int:id>", methods=["DELETE"])
@@ -97,3 +128,48 @@ def unparticipate_event(event_id):
     user.events_participated.remove(event_instance)
     db.session.commit()
     return {"msg": "Participation annulée"}, 200
+
+
+@events_bp.route("/events/genres", methods=["GET"])
+def get_all_genres():
+    genres_set = set()
+    for ev in event.query.all():
+        if ev.genres:
+            for g in ev.genres.split(","):
+                genres_set.add(g.strip())
+    return jsonify({"genres": sorted(genres_set)})
+
+
+@events_bp.route("/genres/categories", methods=["GET"])
+def get_genre_categories():
+    categories = {
+        "Musique": ["Concert", "Electro", "Rap", "Rock", "Pop", "DJ", "Chanson", "Reggae", "Disco", "Folk", "Punk", "Dub"],
+        "Art": ["Peinture", "Sculpture", "Art contemporain", "Arts du cirque", "Atelier artistique", "Photographie", "Exposition"],
+        "Sport": ["Football", "MMA", "Parkour", "Tennis", "Footbag", "Compétition", "Sport"],
+        "Spectacle": ["Théâtre", "Humour", "Improvisation", "Performance", "Cabaret"],
+        "Famille": ["Enfant", "Famille", "Jeunesse", "Jeux"],
+        "Autre": ["Festival", "Conférence", "Forum", "Découverte", "Nature", "Relaxation", "Solidarité", "Culture", "DIY"],
+    }
+    return jsonify(categories)
+
+
+@events_bp.route("/events/suggestions", methods=["GET"])
+@jwt_required()
+def get_suggestions():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    participated_ids = [ev.id for ev in user.events_participated]
+    prefs = user.preferences.split(",") if user.preferences else []
+    if participated_ids:
+        genres = set()
+        for ev in user.events_participated:
+            genres.update(ev.genres.split(",") if ev.genres else [])
+        candidates = event.query.filter(event.id.notin_(participated_ids)).all()
+        filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in genres)]
+    else:
+        candidates = event.query.all()
+        filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in prefs)]
+        if not filtered:
+            filtered = candidates
+    suggestions = random.sample(filtered, min(8, len(filtered)))
+    return jsonify([ev.to_dict() for ev in suggestions])

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import eventservice from "../services/eventService";
 
@@ -12,8 +12,12 @@ const Addevent = ({ user }) => {
     description: "",
     cover_image: "",
   });
-  const allGenres = ["Mode", "Musique", "Théatre"];
+  const [allGenres, setAllGenres] = useState([]);
   const [genres, setGenres] = useState([]);
+
+  useEffect(() => {
+    eventservice.getAllGenres().then(setAllGenres);
+  }, []);
 
   const handleChange = (e) => {
     setevent({ ...event, [e.target.name]: e.target.value });

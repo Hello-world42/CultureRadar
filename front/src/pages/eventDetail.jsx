@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import eventservice from "../services/eventService";
+import { formatEventDate } from "../utils/dateFormat";
 
 const EventDetail = ({ user }) => {
   const { id } = useParams();
@@ -39,7 +40,7 @@ const EventDetail = ({ user }) => {
   if (!event) return <p>Chargement...</p>;
 
   return (
-    <div className="card mx-auto d-flex flex-column" style={{ maxWidth: "600px", minWidth: "350px", height: "100%" }}>
+    <div className="card mx-auto d-flex flex-column" style={{ maxWidth: "900px", minWidth: "350px", height: "100%" }}>
       {event.cover_image && (
         <img
           src={event.cover_image}
@@ -52,13 +53,22 @@ const EventDetail = ({ user }) => {
         <h2 className="card-title">{event.title}</h2>
         <p className="card-text"><strong>Auteur :</strong> {event.author}</p>
         <p className="card-text"><strong>Genres :</strong> {event.genres ? event.genres.split(",").join(", ") : "Aucun"}</p>
-        <p className="card-text"><strong>Date :</strong>{" "}
-          {event.date_fin
-            ? <>Du {event.date_debut} au {event.date_fin}</>
-            : <>Le {event.date_debut}</>
-          }
-        </p>
-        <p className="card-text" style={{ textAlign: "justify" }}>
+        <p className="card-text"><strong>Date :</strong> {formatEventDate(event.date_debut, event.date_fin)}</p>
+        <p className="card-text"><strong>Prix :</strong> {event.prix || "Non communiqué"}</p>
+        {event.event_url && (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <a
+              href={event.event_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline-primary btn-sm mb-2"
+              style={{ width: "fit-content" }}
+            >
+              Voir sur OpenAgenda
+            </a>
+          </div>
+        )}
+        <p className="card-text" style={{ textAlign: "center", marginTop: 10 }}>
           <strong>Description :</strong> {event.description}
         </p>
         {event.participants && event.participants.length > 0 && (

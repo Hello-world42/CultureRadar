@@ -14,6 +14,10 @@ class event(db.Model):
     genres = db.Column(db.String(100))
     description = db.Column(db.Text)
     cover_image = db.Column(db.String(255))
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    prix = db.Column(db.String(50))
+    event_url = db.Column(db.String(255))
 
     def to_dict(self):
         return {
@@ -25,4 +29,8 @@ class event(db.Model):
             "genres": self.genres,
             "description": self.description,
             "cover_image": self.cover_image,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "prix": self.prix,
+            "event_url": self.event_url,
         }

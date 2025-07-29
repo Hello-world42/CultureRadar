@@ -23,6 +23,10 @@ export default function RegisterStep1({ userData, setUserData, setStep, errors, 
       setErrors({ global: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre." });
       return;
     }
+    if (!/^\d{5}$/.test(userData.code_postal)) {
+      setErrors({ global: "Le code postal doit contenir exactement 5 chiffres." });
+      return;
+    }
     setStep(2);
   };
 
@@ -54,6 +58,19 @@ export default function RegisterStep1({ userData, setUserData, setStep, errors, 
         type="password"
         value={userData.password}
         onChange={handleChange}
+        required
+      />
+      <input
+        className="form-control mb-2"
+        name="code_postal"
+        placeholder="Code postal"
+        value={userData.code_postal || ""}
+        onChange={e => {
+          // N'accepte que des chiffres et max 5 caractères
+          setUserData({ ...userData, code_postal: e.target.value.replace(/\D/g, "").slice(0, 5) });
+          setErrors({});
+        }}
+        maxLength={5}
         required
       />
       <button className="btn btn-primary w-100" type="submit">

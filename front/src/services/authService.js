@@ -59,7 +59,7 @@ const authService = {
     return json;
   },
 
-  updatePreferences: async (preferences) => {
+  updatePreferences: async (preferences, code_postal, latitude, longitude) => {
     const token = localStorage.getItem("token");
     const res = await fetch("/api/update-preferences", {
       method: "POST",
@@ -67,7 +67,7 @@ const authService = {
         "Content-Type": "application/json",
         Authorization: "Bearer " + token,
       },
-      body: JSON.stringify({ preferences }),
+      body: JSON.stringify({ preferences, code_postal, latitude, longitude }),
     });
     if (!res.ok) throw await res.json();
     return res.json();
