@@ -18,6 +18,7 @@ class event(db.Model):
     longitude = db.Column(db.Float, nullable=True)
     prix = db.Column(db.String(50))
     event_url = db.Column(db.String(255))
+    code_postal = db.Column(db.String(10))
 
     def to_dict(self):
         return {
@@ -33,4 +34,5 @@ class event(db.Model):
             "longitude": self.longitude,
             "prix": self.prix,
             "event_url": self.event_url,
+            "code_postal": self.code_postal,
         }

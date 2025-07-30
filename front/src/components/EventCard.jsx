@@ -7,13 +7,12 @@ const CARD_WIDTH = 400;
 const CARD_HEIGHT = 370;
 const IMG_HEIGHT = 140;
 
-const EventCard = ({ event, user }) => {
+const EventCard = ({ event, user, onlyActions }) => {
   const isParticipating = user?.events_participated?.some(ev => ev.id === event.id);
 
   const handleParticipate = async (eventId) => {
     try {
       await eventservice.participate(eventId);
-      alert("Participation enregistrée !");
       window.location.reload();
     } catch (e) {
       alert("Erreur lors de la participation.");
@@ -23,12 +22,36 @@ const EventCard = ({ event, user }) => {
   const handleUnparticipate = async (eventId) => {
     try {
       await eventservice.unparticipate(eventId);
-      alert("Participation annulée !");
       window.location.reload();
     } catch (e) {
       alert("Erreur lors de l'annulation.");
     }
   };
+
+  if (onlyActions) {
+    return (
+      <div>
+        <Link to={`/events/${event.id}`} className="btn btn-primary w-100 mb-2 mt-auto">
+          Voir les détails
+        </Link>
+        {isParticipating ? (
+          <button
+            className="btn btn-secondary btn-sm w-100"
+            onClick={() => handleUnparticipate(event.id)}
+          >
+            Je ne participe plus...
+          </button>
+        ) : (
+          <button
+            className="btn btn-success btn-sm w-100"
+            onClick={() => handleParticipate(event.id)}
+          >
+            Je participe !
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div

@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request
 from back.extensions import db
 from back.models.event import event
 from back.models.user import User
+from back.models.notification import Notification
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 
@@ -19,31 +20,33 @@ events_bp = Blueprint("events", __name__)
 
 
 @events_bp.route("/events", methods=["POST"])
-def add_event():
+def create_event():
     data = request.get_json()
-    date_debut = datetime.strptime(data["date_debut"], "%Y-%m-%d").date()
+    # Conversion des dates
+    date_debut = None
     date_fin = None
+    if data.get("date_debut"):
+        date_debut = datetime.strptime(data["date_debut"], "%Y-%m-%d").date()
     if data.get("date_fin"):
-        date_fin = datetime.strptime(data["date_fin"], "%Y-%m-%d").date()
-    genres = data.get("genres", [])
-    if isinstance(genres, list):
-        genres_str = ",".join(genres)
-    elif isinstance(genres, str):
-        genres_str = genres
-    else:
-        genres_str = ""
-    new_event = event(
-        title=data["title"],
-        author=data["author"],
+        if data["date_fin"]:
+            date_fin = datetime.strptime(data["date_fin"], "%Y-%m-%d").date()
+    event_instance = event(
+        title=data.get("title"),
+        author=data.get("author"),
         date_debut=date_debut,
         date_fin=date_fin,
+        genres=",".join(data.get("genres", [])),
         description=data.get("description"),
         cover_image=data.get("cover_image"),
-        genres=genres_str,
+        latitude=data.get("latitude"),
+        longitude=data.get("longitude"),
+        prix=data.get("prix"),
+        event_url=data.get("event_url"),
+        code_postal=data.get("code_postal"),
     )
-    db.session.add(new_event)
+    db.session.add(event_instance)
     db.session.commit()
-    return jsonify(new_event.to_dict()), 201
+    return jsonify({"success": True, "id": event_instance.id})
 
 
 @events_bp.route("/events", methods=["GET"])
@@ -59,9 +62,14 @@ def get_events():
 
     events = event.query.all()
     filtered = []
+    def normalize(g):
+        return g.strip().lower()
+
+    user_prefs_norm = set(normalize(g) for g in user_prefs)
     for ev in events:
         ev_genres = ev.genres.split(",") if ev.genres else []
-        if ev.author == user.username or any(g in user_prefs for g in ev_genres):
+        ev_genres_norm = set(normalize(g) for g in ev_genres)
+        if ev.author == user.username or user_prefs_norm.intersection(ev_genres_norm):
             if ev.latitude and ev.longitude and user_lat and user_lon:
                 dist = haversine(user_lat, user_lon, ev.latitude, ev.longitude)
                 if max_distance == 0 or dist <= max_distance:
@@ -143,12 +151,21 @@ def get_all_genres():
 @events_bp.route("/genres/categories", methods=["GET"])
 def get_genre_categories():
     categories = {
-        "Musique": ["Concert", "Electro", "Rap", "Rock", "Pop", "DJ", "Chanson", "Reggae", "Disco", "Folk", "Punk", "Dub"],
-        "Art": ["Peinture", "Sculpture", "Art contemporain", "Arts du cirque", "Atelier artistique", "Photographie", "Exposition"],
-        "Sport": ["Football", "MMA", "Parkour", "Tennis", "Footbag", "Compétition", "Sport"],
-        "Spectacle": ["Théâtre", "Humour", "Improvisation", "Performance", "Cabaret"],
-        "Famille": ["Enfant", "Famille", "Jeunesse", "Jeux"],
-        "Autre": ["Festival", "Conférence", "Forum", "Découverte", "Nature", "Relaxation", "Solidarité", "Culture", "DIY"],
+        "Musique": ["Concert", "Electro", "Rap", "Rock", "Pop", "DJ", "Chanson", "Reggae", "Disco", "Folk", "Punk", "Dub", "Jazz", "Electro-pop", "Hard techno", "Hardgroove", "Hardmusic", "Hardtechno", "Uptempo", "Metal", "Progressive", "House", "Afrohouse", "Shatta", "Latin", "Reggaeton", "Live", "Orchestrale"],
+        "Art": ["Peinture", "Sculpture", "Art contemporain", "Atelier artistique", "Photographie", "Exposition", "Céramique", "Fantastique", "Imaginaire", "Lithographie", "Edition", "Artiste", "Autrice"],
+        "Sport": ["Football", "MMA", "Parkour", "Tennis", "Footbag", "Compétition", "Sport", "Kinball", "Tournoi", "Urbain", "Street workout", "Junior", "Initiation", "Sport gratuit"],
+        "Spectacle": ["Théâtre", "Humour", "Improvisation", "Performance", "Cabaret", "Stand up", "Mise en scène", "Show", "Showcase", "Spectacle", "Festival", "Comedy club"],
+        "Famille": ["Enfant", "Famille", "Jeunesse", "Jeux", "Atelier", "Diversité", "Interculturalité", "Langue", "Lecture", "Tout public"],
+        "Vie nocturne": ["Soirée", "Club", "Warehouse", "Rave", "Nuit", "Étudiant", "Fête", "Campus", "Pride"],
+        "Nature & Environnement": ["Nature", "Jardin", "Biodiversité", "Balade nature", "Plante", "Engagé", "Bio", "Écologie", "Découverte", "Bords de loire", "Nature en ville"],
+        "Rencontres & Société": ["Forum", "Conférence", "Rencontre", "Interconnaissance", "Convivialité", "Solidarité", "Social", "Ess", "Tiers-lieu", "Visite"],
+        "Accessibilité": ["Handicap", "Handicaplap"],
+        "Science & Makers": ["Science", "Technologie", "DIY", "Do it yourself", "Recyclage", "Plastique", "Déchet"],
+        "Histoire & Société": ["Histoire", "Résistance", "Patrimoine", "Prisionniersdeguerre", "Secondeguerremondiale", "Histoire sociale", "Monde du travail", "Syndicalisme", "Sécurité sociale"],
+        "Jeux & Loisirs": ["Jeux de cartes", "Jeux de sociétés", "Soirée jeux", "Flashmob", "Animation", "Loisir", "Détente", "Tout niveau"],
+        "Culture & Littérature": ["Bibliothèque", "Littérature", "Lecture", "Langue", "Littérature jeunesse"],
+        "Lieux & Festivals": ["Saison culturelle", "Restauration", "Machines de l'ile de nantes", "Ferrailleur", "Stereolux", "Square vertais", "Région pays de la loire", "Nantes maker campus", "Nantes métropole", "Ile de nantes"],
+        "Autre": ["Autre"]
     }
     return jsonify(categories)
 
@@ -173,3 +190,89 @@ def get_suggestions():
             filtered = candidates
     suggestions = random.sample(filtered, min(8, len(filtered)))
     return jsonify([ev.to_dict() for ev in suggestions])
+
+
+@events_bp.route("/events/<int:event_id>", methods=["PUT"])
+@jwt_required()
+def update_event(event_id):
+    data = request.get_json()
+    event_instance = event.query.get_or_404(event_id)
+    old_data = event_instance.to_dict()
+    event_instance.title = data.get("title", event_instance.title)
+    event_instance.date_debut = datetime.strptime(data["date_debut"], "%Y-%m-%d").date() if data.get("date_debut") else event_instance.date_debut
+    event_instance.date_fin = datetime.strptime(data["date_fin"], "%Y-%m-%d").date() if data.get("date_fin") else event_instance.date_fin
+    event_instance.genres = ",".join(data.get("genres", [])) if isinstance(data.get("genres"), list) else data.get("genres", event_instance.genres)
+    event_instance.description = data.get("description", event_instance.description)
+    event_instance.cover_image = data.get("cover_image", event_instance.cover_image)
+    event_instance.latitude = data.get("latitude", event_instance.latitude)
+    event_instance.longitude = data.get("longitude", event_instance.longitude)
+    event_instance.prix = data.get("prix", event_instance.prix)
+    event_instance.event_url = data.get("event_url", event_instance.event_url)
+    event_instance.code_postal = data.get("code_postal", event_instance.code_postal)
+    db.session.commit()
+
+    # Compare old_data et new_data pour générer un message de modification
+    changes = []
+    rename = None
+    for key in old_data:
+        if key in data and str(data[key]) != str(old_data[key]):
+            if key == "title":
+                rename = (old_data["title"], data["title"])
+            elif key == "genres":
+                changes.append("ses genres")
+            elif key == "description":
+                changes.append("sa description")
+            else:
+                changes.append(f"{key}")
+
+    if rename or changes:
+        if rename:
+            message = f"L'événement \"{rename[0]}\" a été modifié : Il s'appelle désormais \"{rename[1]}\""
+            if changes:
+                message += ", " + " et ".join(changes) + " ont changé"
+        else:
+            message = f"L'événement \"{event_instance.title}\" a été modifié : " + ", ".join(changes) + " ont changé"
+        # Envoie une notif à chaque participant
+        for user in event_instance.participants:
+            notif = Notification(
+                user_id=user.id,
+                message=message,
+                event_id=event_instance.id,
+                lu=False
+            )
+            db.session.add(notif)
+        db.session.commit()
+
+    return jsonify({"success": True, "id": event_instance.id})
+
+
+@events_bp.route("/notifications", methods=["GET"])
+@jwt_required()
+def get_notifications():
+    user_id = get_jwt_identity()
+    notifs = Notification.query.filter_by(user_id=user_id).order_by(Notification.date.desc()).all()
+    return jsonify([n.to_dict() for n in notifs])
+
+
+@events_bp.route("/notifications/<int:notif_id>/read", methods=["POST"])
+@jwt_required()
+def read_notification(notif_id):
+    user_id = get_jwt_identity()
+    notif = Notification.query.get_or_404(notif_id)
+    if notif.user_id != user_id:
+        return {"msg": "Accès non autorisé"}, 403
+    notif.lu = True
+    db.session.commit()
+    return {"msg": "Notification marquée comme lue"}, 200
+
+
+@events_bp.route("/notifications/<int:notif_id>", methods=["DELETE"])
+@jwt_required()
+def delete_notification(notif_id):
+    user_id = get_jwt_identity()
+    notif = Notification.query.get_or_404(notif_id)
+    if notif.user_id != user_id:
+        return {"msg": "Accès non autorisé"}, 403
+    db.session.delete(notif)
+    db.session.commit()
+    return {"msg": "Notification supprimée"}, 200

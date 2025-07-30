@@ -30,6 +30,10 @@ const eventservice = {
     const res = await api.get("/events/suggestions");
     return res.data;
   },
+  updateevent: async (id, eventData) => {
+    const res = await api.put(`/events/${id}`, eventData);
+    return res.data;
+  },
 };
 
 export default eventservice;

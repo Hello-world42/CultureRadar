@@ -16,6 +16,8 @@ import "./styles/App.css";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CheckEmail from "./pages/CheckEmail";
+import MesEvenements from "./pages/MesEvenements";
+import Editevent from "./pages/Editevent";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -82,6 +84,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/check-email" element={<CheckEmail />} />
+          <Route path="/mes-evenements" element={<MesEvenements user={user} />} />
+          <Route path="/events/:id/edit" element={<Editevent user={user} />} />
         </Routes>
       </main>
       {!isAuthPage && user && <Footer />}

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import eventservice from "../services/eventService";
 import { formatEventDate } from "../utils/dateFormat";
 
 const EventDetail = ({ user }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [error, setError] = useState(null);
 
@@ -90,6 +91,14 @@ const EventDetail = ({ user }) => {
               onClick={() => handleParticipate(event.id)}
             >
               Je participe !
+            </button>
+          )}
+          {user?.username === event.author && (
+            <button
+              className="btn btn-warning mt-3 w-100"
+              onClick={() => navigate(`/events/${event.id}/edit`)}
+            >
+              Modifier
             </button>
           )}
         </div>

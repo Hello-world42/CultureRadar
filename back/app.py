@@ -20,6 +20,8 @@ mail = Mail(app)
 # Forcer l'import des modèles pour Flask-Migrate
 from back.models import user, event
 from back.models.user import User
+from back.models.event import event
+from back.models.notification import Notification
 
 from back.routes.auth import auth_bp
 from back.routes.events import events_bp
