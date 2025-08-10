@@ -20,7 +20,7 @@ const Profile = ({ user }) => {
 
   useEffect(() => {
     eventService.getAllGenres().then(setAllOptions);
-    fetch("http://localhost:5000/api/genres/categories")
+    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
       .then(res => res.json())
       .then(setCategories);
   }, []);

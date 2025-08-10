@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
-import EventDetail from "./pages/EventDetail";
+import EventDetail from "./pages/eventDetail";
 import Profile from "./pages/Profile";
 import Addevent from "./pages/Addevent";
 import Login from "./pages/Login";

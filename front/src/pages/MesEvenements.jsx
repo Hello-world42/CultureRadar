@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import eventservice from "../services/eventService";
 import EventCard from "../components/EventCard";
+import { formatEventDate } from "../utils/dateFormat";
 
 const TABS = [
   { key: "passes", label: "Evènements passés" },
@@ -15,21 +16,24 @@ const MesEvenements = ({ user }) => {
   useEffect(() => {
     if (!user) return;
     const now = new Date();
-    // Récupère les events auxquels l'utilisateur participe
     eventservice.getAllevents().then(data => {
       const passes = [];
       const futurs = [];
+      const ajoutes = [];
+      // Récupère les IDs des événements auxquels l'utilisateur participe
+      const userEventIds = user.events_participated?.map(e => e.id) || [];
       data.events.forEach(ev => {
-        const isParticipating = user.events_participated?.some(e => e.id === ev.id);
+        const isParticipating = userEventIds.includes(ev.id);
         const isAdded = ev.author === user.username;
         const dateFin = ev.date_fin ? new Date(ev.date_fin) : new Date(ev.date_debut);
+
         if (isParticipating) {
           if (dateFin < now) passes.push(ev);
           else futurs.push(ev);
         }
-        if (isAdded) events.ajoutes.push(ev);
+        if (isAdded) ajoutes.push(ev);
       });
-      setEvents({ passes, futurs, ajoutes: events.ajoutes });
+      setEvents({ passes, futurs, ajoutes });
     });
   }, [user]);
 
@@ -57,7 +61,7 @@ const MesEvenements = ({ user }) => {
         ))}
       </div>
       <div>
-        {events[tab].length === 0 ? (
+        {uniqueEvents[tab].length === 0 ? (
           <p style={{ color: "#888" }}>Aucun évènement dans cette catégorie.</p>
         ) : (
           <div
@@ -122,7 +126,7 @@ const MesEvenements = ({ user }) => {
                     <h4 style={{ margin: "0 0 16px 0" }}>{ev.title}</h4>
                     <p style={{ marginBottom: 10, color: "#888" }}>Auteur : {ev.author}</p>
                     <p style={{ marginBottom: 18, fontWeight: "bold" }}>
-                      Date : {ev.date_debut} {ev.date_fin ? `au ${ev.date_fin}` : ""}
+                      Date : {formatEventDate(ev.date_debut, ev.date_fin)}
                     </p>
                   </div>
                   <div>

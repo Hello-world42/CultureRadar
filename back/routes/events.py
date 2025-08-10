@@ -177,17 +177,24 @@ def get_suggestions():
     user = User.query.get(user_id)
     participated_ids = [ev.id for ev in user.events_participated]
     prefs = user.preferences.split(",") if user.preferences else []
+
     if participated_ids:
         genres = set()
         for ev in user.events_participated:
             genres.update(ev.genres.split(",") if ev.genres else [])
         candidates = event.query.filter(event.id.notin_(participated_ids)).all()
         filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in genres)]
-    else:
+        if not filtered and prefs:
+            filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in prefs)]
+    elif prefs:
         candidates = event.query.all()
         filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in prefs)]
-        if not filtered:
-            filtered = candidates
+    else:
+        filtered = event.query.all()
+
+    if not filtered:
+        filtered = event.query.all()
+
     suggestions = random.sample(filtered, min(8, len(filtered)))
     return jsonify([ev.to_dict() for ev in suggestions])
 

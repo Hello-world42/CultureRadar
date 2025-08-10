@@ -11,7 +11,7 @@ export default function RegisterStep2({ userData, setUserData, setErrors, errors
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/genres/categories")
+    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
       .then(res => res.json())
       .then(setCategories);
   }, []);

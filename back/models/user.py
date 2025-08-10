@@ -39,4 +39,5 @@ class User(db.Model):
             "email": self.email,
             "preferences": self.preferences,
             "code_postal": self.code_postal,
+            "events_participated": [ev.to_dict() for ev in self.events_participated],
         }

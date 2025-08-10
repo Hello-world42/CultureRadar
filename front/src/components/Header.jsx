@@ -28,7 +28,7 @@ const Header = () => {
           <h1 className="h3 m-0">Capsule Culture</h1>
         </Link>
         <nav>
-          <ul className="list-unstyled d-flex m-0">
+          <ul className="list-unstyled d-flex m-0" style={{ alignItems: "center" }}>
             <li className="me-3">
               <Link to="/" className="text-white text-decoration-none">
                 Accueil
@@ -57,7 +57,19 @@ const Header = () => {
                 <li className="me-3">
                   <button
                     className="btn btn-link"
-                    style={{ color: "#fff", fontSize: 22, position: "relative" }}
+                    style={{
+                      color: "#fff",
+                      fontSize: "1.5em",
+                      position: "relative",
+                      verticalAlign: "middle",
+                      padding: 0,
+                      marginTop: 2,
+                      height: 32,
+                      width: 32,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                     onClick={() => setShowNotif((v) => !v)}
                     aria-label="Notifications"
                   >
@@ -69,8 +81,8 @@ const Header = () => {
                       <span
                         style={{
                           position: "absolute",
-                          top: 0,
-                          right: 0,
+                          top: 2,
+                          right: 2,
                           background: "#d32f2f",
                           color: "#fff",
                           borderRadius: "50%",
