@@ -29,5 +29,11 @@ from back.routes.events import events_bp
 app.register_blueprint(auth_bp, url_prefix="/api")
 app.register_blueprint(events_bp, url_prefix="/api")
 
+
+@app.route("/")
+def index():
+    return "API CultureRadar is running!"
+
+
 if __name__ == "__main__":
     app.run(debug=True)
