@@ -21,7 +21,7 @@ const Addevent = ({ user }) => {
   const fileInputRef = useRef();
 
   useEffect(() => {
-    fetch("/api/genres/categories")
+    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
       .then((res) => res.json())
       .then(setCategories);
   }, []);

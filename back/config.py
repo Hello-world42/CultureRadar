@@ -21,3 +21,6 @@ class Config:
     MAIL_PASSWORD = "b9028b2cf79d6c"
     MAIL_DEFAULT_SENDER = "noreply@cultureradar.com"
     MAIL_SUPPRESS_SEND = False
+
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")

@@ -6,6 +6,7 @@ import secrets
 from flask_mail import Message
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
+from back.config import BASE_URL, FRONTEND_URL
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -54,7 +55,7 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    confirm_url = f"http://localhost:5000/api/confirm/{token}"
+    confirm_url = f"{BASE_URL}/api/confirm/{token}"
     from back.app import mail
     msg = Message("Confirme ton email", recipients=[user.email])
     msg.html = f"""
@@ -124,7 +125,7 @@ def confirm_email(token):
     user.is_confirmed = True
     user.confirmation_token = None
     db.session.commit()
-    return redirect("http://localhost:3000/confirmation-success")
+    return redirect(f"{FRONTEND_URL}/confirmation-success")
 
 
 @auth_bp.route("/forgot-password", methods=["POST"])
@@ -137,7 +138,7 @@ def forgot_password():
     token = secrets.token_urlsafe(32)
     user.reset_token = token
     db.session.commit()
-    reset_url = f"http://localhost:3000/reset-password/{token}"
+    reset_url = f"{FRONTEND_URL}/reset-password/{token}"
     from back.app import mail
     msg = Message("Réinitialisation du mot de passe", recipients=[user.email])
     msg.html = f"""

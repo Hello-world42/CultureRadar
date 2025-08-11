@@ -2,7 +2,7 @@ import api from "./api";
 
 const authService = {
   register: async (userData) => {
-    const res = await fetch("/api/register", {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
@@ -38,7 +38,7 @@ const authService = {
   },
 
   forgotPassword: async (email) => {
-    const res = await fetch("/api/forgot-password", {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -49,7 +49,7 @@ const authService = {
   },
 
   resetPassword: async (token, new_password) => {
-    const res = await fetch(`/api/reset-password/${token}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/reset-password/${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_password }),
@@ -61,7 +61,7 @@ const authService = {
 
   updatePreferences: async (preferences, code_postal, latitude, longitude) => {
     const token = localStorage.getItem("token");
-    const res = await fetch("/api/update-preferences", {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-preferences`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

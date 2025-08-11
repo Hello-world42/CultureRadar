@@ -18,7 +18,7 @@ const Editevent = ({ user }) => {
   }, [id]);
 
   useEffect(() => {
-    fetch("/api/genres/categories")
+    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
       .then((res) => res.json())
       .then(setCategories);
   }, []);
