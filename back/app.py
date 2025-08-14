@@ -14,7 +14,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=72)
 db.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
-CORS(app)
+CORS(app, origins=["https://cultureradar-frontend.onrender.com"])
 mail = Mail(app)
 
 # Forcer l'import des modèles pour Flask-Migrate

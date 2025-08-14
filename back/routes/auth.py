@@ -13,7 +13,9 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    print("Route /register appelée")
     data = request.get_json()
+    print("Données reçues :", data)
 
     if len(data["username"]) < 6:
         return jsonify({"msg": "Nombre de caractères du nom d'utilisateur insuffisant"}), 400
