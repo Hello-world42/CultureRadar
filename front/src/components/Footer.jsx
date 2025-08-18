@@ -12,9 +12,28 @@ const Footer = () => (
     }}
   >
     <div className="container text-center">
-      <Link to="/about" className="text-white text-decoration-none">
-        A propos
-      </Link>
+      <ul className="list-unstyled">
+        <li className="d-inline-block mx-2">
+          <Link to="/a-propos" className="text-white text-decoration-none">
+            À propos
+          </Link>
+        </li>
+        <li className="d-inline-block mx-2">
+          <Link to="/mentions-legales" className="text-white text-decoration-none">
+            Mentions légales
+          </Link>
+        </li>
+        <li className="d-inline-block mx-2">
+          <Link to="/politique-confidentialite" className="text-white text-decoration-none">
+            Politique de confidentialité
+          </Link>
+        </li>
+        <li className="d-inline-block mx-2">
+          <Link to="/cgv" className="text-white text-decoration-none">
+            Conditions générales de vente
+          </Link>
+        </li>
+      </ul>
     </div>
   </footer>
 );

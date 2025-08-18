@@ -8,7 +8,10 @@ import Profile from "./pages/Profile";
 import Addevent from "./pages/Addevent";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import About from "./pages/About";
+import About from "./pages/legal/About";
+import LegalNotice from "./pages/legal/LegalNotice";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import TermsOfSale from "./pages/legal/TermsOfSale";
 import ConfirmationSuccess from "./pages/ConfirmationSuccess";
 import authService from "./services/authService";
 import RequireAuth from "./components/RequireAuth";
@@ -79,7 +82,10 @@ function App() {
             path="/profile"
             element={<Profile user={user} />}
           />
-          <Route path="/about" element={<About />} />
+          <Route path="/a-propos" element={<About />} />
+          <Route path="/mentions-legales" element={<LegalNotice />} />
+          <Route path="/politique-confidentialite" element={<PrivacyPolicy />} />
+          <Route path="/cgv" element={<TermsOfSale />} />
           <Route path="/confirmation-success" element={<ConfirmationSuccess />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />

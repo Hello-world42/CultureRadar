@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+.legal-page {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  color: #222;
+}
+.legal-page h1 {
+  margin-bottom: 1rem;
+}
+.legal-page h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
