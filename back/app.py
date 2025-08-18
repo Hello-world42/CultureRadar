@@ -44,5 +44,15 @@ def ping():
     return "pong"
 
 
+@app.route("/api/dbtest")
+def dbtest():
+    from back.models.user import User
+    try:
+        user_count = User.query.count()
+        return f"Nombre d'utilisateurs : {user_count}"
+    except Exception as e:
+        return f"Erreur DB : {e}"
+
+
 if __name__ == "__main__":
     app.run(debug=True)
