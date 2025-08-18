@@ -39,5 +39,10 @@ def index():
     return "API CultureRadar is running!"
 
 
+@app.route("/api/ping")
+def ping():
+    return "pong"
+
+
 if __name__ == "__main__":
     app.run(debug=True)
