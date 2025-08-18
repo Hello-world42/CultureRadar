@@ -14,7 +14,7 @@ export default function LegalNotice() {
       </p>
       <h2>Hébergement</h2>
       <p>
-        Le site est hébergé par un prestataire en cours de sélection (à préciser lors de la mise en ligne officielle).
+        Le site est hébergé par Render.
       </p>
       <h2>Propriété intellectuelle</h2>
       <p>
