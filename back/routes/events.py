@@ -90,6 +90,43 @@ def get_events():
     })
 
 
+@events_bp.route("/events/public", methods=["GET"])
+def get_public_events():
+    max_distance = float(request.args.get("distance", 0))
+    page = int(request.args.get("page", 1))
+    size = int(request.args.get("size", 30))
+
+    events = event.query.order_by(event.date_debut.asc()).all()
+
+    user_lat = request.args.get("latitude", type=float)
+    user_lon = request.args.get("longitude", type=float)
+
+    filtered = []
+    if user_lat and user_lon and max_distance > 0:
+        for ev in events:
+            if ev.latitude and ev.longitude:
+                dist = haversine(user_lat, user_lon, ev.latitude, ev.longitude)
+                if dist <= max_distance:
+                    filtered.append(ev.to_dict())
+    else:
+        filtered = [ev.to_dict() for ev in events]
+
+    total = len(filtered)
+    totalPages = max(1, (total + size - 1) // size)
+    start = (page - 1) * size
+    end = start + size
+    paginated = filtered[start:end]
+
+    return jsonify({
+        "events": paginated,
+        "totalPages": totalPages,
+        "page": page,
+        "size": size,
+        "total": total,
+        "public": True
+    })
+
+
 @events_bp.route("/events/<int:id>", methods=["DELETE"])
 def delete_event(id):
     event_instance = event.query.get_or_404(id)

@@ -48,28 +48,13 @@ function App() {
 
   return (
     <div className="App d-flex flex-column min-vh-100">
-      {!isAuthPage && user && <Header user={user} setUser={setUser} />}
+      {!isAuthPage && <Header user={user} setUser={setUser} />}
       <main className="container mt-4 flex-grow-1">
         <Routes>
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
-          {}
-          <Route
-            path="/"
-            element={
-              <RequireAuth user={user}>
-                <Home user={user} />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/events/:id"
-            element={
-              <RequireAuth user={user}>
-                <EventDetail user={user} />
-              </RequireAuth>
-            }
-          />
+          <Route path="/" element={<Home user={user} />} />
+          <Route path="/events/:id" element={<EventDetail user={user} />} />
           <Route
             path="/add-event"
             element={
@@ -94,7 +79,7 @@ function App() {
           <Route path="/events/:id/edit" element={<Editevent user={user} />} />
         </Routes>
       </main>
-      {!isAuthPage && user && <Footer />}
+      {!isAuthPage && <Footer />}
     </div>
   );
 }

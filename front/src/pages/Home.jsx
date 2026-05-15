@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import eventservice from "../services/eventService";
 import EventCard from "../components/EventCard";
 import EventCarousel from "../components/EventCarousel";
+import { Link } from "react-router-dom";
 
 const Home = ({ user }) => {
   const [events, setevents] = useState([]);
@@ -12,37 +13,67 @@ const Home = ({ user }) => {
   useEffect(() => {
     const fetchevents = async () => {
       try {
-        const data = await eventservice.getAllevents(distance, page, 30);
+        let data;
+        if (user) {
+          data = await eventservice.getAllevents(distance, page, 30);
+        } else {
+          try {
+            data = await eventservice.getPublicevents(distance, page, 30);
+          } catch (publicError) {
+            data = await eventservice.getAllevents(0, page, 30);
+          }
+        }
         setevents(data.events);
         setTotalPages(data.totalPages);
       } catch (error) {
-        console.error("Erreur chargement des events :", error);
+        setevents([]);
+        setTotalPages(1);
       }
     };
     fetchevents();
-  }, [distance, page]);
+  }, [distance, page, user]);
 
   return (
     <div>
-      <EventCarousel user={user} />
-      <div className="mb-4">
-        <label htmlFor="distance" style={{ marginRight: 10 }}>
-          Distance max (km) :
-        </label>
-        <input
-          type="range"
-          id="distance"
-          min={5}
-          max={100}
-          step={1}
-          value={distance}
-          onChange={e => setDistance(Number(e.target.value))}
-          style={{ width: 300, accentColor: "#1976d2" }}
-        />
-        <span style={{ marginLeft: 15, fontWeight: "bold", color: "#1976d2" }}>
-          {distance} km
-        </span>
-      </div>
+      {!user && (
+        <div className="alert alert-info mb-4">
+          <h4>Bienvenue sur CultureRadar !</h4>
+          <p className="mb-0">
+            Vous etes en mode visiteur. Vous pouvez parcourir les evenements, puis
+            <Link to="/login" className="alert-link"> vous connecter</Link> ou
+            <Link to="/register" className="alert-link"> creer un compte</Link>
+            pour des recommandations personnalisees et vous inscrire aux evenements.
+          </p>
+        </div>
+      )}
+
+      {user && <EventCarousel user={user} />}
+
+      {user && (
+        <div className="mb-4">
+          <label htmlFor="distance" style={{ marginRight: 10 }}>
+            Distance max (km) :
+          </label>
+          <input
+            type="range"
+            id="distance"
+            min={5}
+            max={100}
+            step={1}
+            value={distance}
+            onChange={e => setDistance(Number(e.target.value))}
+            style={{ width: 300, accentColor: "#1976d2" }}
+          />
+          <span style={{ marginLeft: 15, fontWeight: "bold", color: "#1976d2" }}>
+            {distance} km
+          </span>
+        </div>
+      )}
+
+      <h5 className="mb-4 text-start fw-normal">
+        {user ? "Evenements recommandes pour vous :" : "Derniers evenements"}
+      </h5>
+
       <div className="row">
         {events.map((event) => (
           <div key={event.id} className="col-md-4 mb-3 d-flex">
@@ -50,6 +81,14 @@ const Home = ({ user }) => {
           </div>
         ))}
       </div>
+
+      {events.length === 0 && (
+        <div className="text-center text-muted py-5">
+          <h5>Aucun evenement trouve</h5>
+          <p>Essayez de vous connecter pour des recommandations personnalisees.</p>
+        </div>
+      )}
+
       <div className="d-flex justify-content-center mt-4">
         <button
           className="btn btn-outline-primary mx-2"

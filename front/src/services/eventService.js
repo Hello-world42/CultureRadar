@@ -11,6 +11,15 @@ const eventservice = {
     });
     return res.data;
   },
+  getPublicevents: async (distance = 0, page = 1, size = 30, latitude = null, longitude = null) => {
+    const params = { distance, page, size };
+    if (latitude && longitude) {
+      params.latitude = latitude;
+      params.longitude = longitude;
+    }
+    const res = await api.get("/events/public", { params });
+    return res.data;
+  },
   geteventById: async (id) => {
     const res = await api.get(`/events/${id}`);
     return res.data;

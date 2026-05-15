@@ -34,7 +34,11 @@ const EventCard = ({ event, user, onlyActions }) => {
         <Link to={`/events/${event.id}`} className="btn btn-primary w-100 mb-2 mt-auto">
           Voir les détails
         </Link>
-        {isParticipating ? (
+        {!user ? (
+          <Link to="/login" className="btn btn-outline-success btn-sm w-100">
+            Connectez-vous pour participer
+          </Link>
+        ) : isParticipating ? (
           <button
             className="btn btn-secondary btn-sm w-100"
             onClick={() => handleUnparticipate(event.id)}
@@ -89,7 +93,11 @@ const EventCard = ({ event, user, onlyActions }) => {
         <Link to={`/events/${event.id}`} className="btn btn-primary w-100 mb-2 mt-auto">
           Voir les détails
         </Link>
-        {isParticipating ? (
+        {!user ? (
+          <Link to="/login" className="btn btn-outline-success btn-sm w-100">
+            Connectez-vous pour participer
+          </Link>
+        ) : isParticipating ? (
           <button
             className="btn btn-secondary btn-sm w-100"
             onClick={() => handleUnparticipate(event.id)}
