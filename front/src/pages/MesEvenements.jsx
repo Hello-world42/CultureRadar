@@ -15,26 +15,18 @@ const MesEvenements = ({ user }) => {
 
   useEffect(() => {
     if (!user) return;
-    const now = new Date();
-    eventservice.getAllevents().then(data => {
-      const passes = [];
-      const futurs = [];
-      const ajoutes = [];
-      // Récupère les IDs des événements auxquels l'utilisateur participe
-      const userEventIds = user.events_participated?.map(e => e.id) || [];
-      data.events.forEach(ev => {
-        const isParticipating = userEventIds.includes(ev.id);
-        const isAdded = ev.author === user.username;
-        const dateFin = ev.date_fin ? new Date(ev.date_fin) : new Date(ev.date_debut);
-
-        if (isParticipating) {
-          if (dateFin < now) passes.push(ev);
-          else futurs.push(ev);
-        }
-        if (isAdded) ajoutes.push(ev);
+    eventservice
+      .getMyEvents()
+      .then((data) => {
+        setEvents({
+          passes: data.past_events || [],
+          futurs: data.future_events || [],
+          ajoutes: data.created_events || [],
+        });
+      })
+      .catch(() => {
+        setEvents({ passes: [], futurs: [], ajoutes: [] });
       });
-      setEvents({ passes, futurs, ajoutes });
-    });
   }, [user]);
 
   const deduplicate = arr =>

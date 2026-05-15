@@ -6,15 +6,19 @@ import {
   markAsRead,
 } from "../services/notificationService";
 
-const Header = () => {
+const Header = ({ user }) => {
   const [showNotif, setShowNotif] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("token");
+  const isLoggedIn = !!user;
 
   useEffect(() => {
-    getNotifications().then(setNotifications);
-  }, []);
+    if (!isLoggedIn) {
+      setNotifications([]);
+      return;
+    }
+    getNotifications().then(setNotifications).catch(() => setNotifications([]));
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");

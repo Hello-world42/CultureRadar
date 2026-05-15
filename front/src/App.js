@@ -33,7 +33,10 @@ function App() {
       authService
         .me()
         .then(setUser)
-        .catch(() => setUser(null))
+        .catch(() => {
+          localStorage.removeItem("token");
+          setUser(null);
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);

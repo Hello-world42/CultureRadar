@@ -20,6 +20,10 @@ const eventservice = {
     const res = await api.get("/events/public", { params });
     return res.data;
   },
+  getMyEvents: async () => {
+    const res = await api.get("/events/mine");
+    return res.data;
+  },
   geteventById: async (id) => {
     const res = await api.get(`/events/${id}`);
     return res.data;

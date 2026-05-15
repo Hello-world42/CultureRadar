@@ -6,7 +6,7 @@ from back.models.event import event
 from back.models.user import User
 from back.models.notification import Notification
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from datetime import datetime
+from datetime import datetime, date
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371
@@ -17,6 +17,16 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 events_bp = Blueprint("events", __name__)
+
+
+def is_upcoming_event(ev):
+    reference = ev.date_fin or ev.date_debut
+    return reference is not None and reference >= date.today()
+
+
+def is_past_event(ev):
+    reference = ev.date_fin or ev.date_debut
+    return reference is not None and reference < date.today()
 
 
 @events_bp.route("/events", methods=["POST"])
@@ -67,12 +77,16 @@ def get_events():
 
     user_prefs_norm = set(normalize(g) for g in user_prefs)
     for ev in events:
+        if not is_upcoming_event(ev):
+            continue
         ev_genres = ev.genres.split(",") if ev.genres else []
         ev_genres_norm = set(normalize(g) for g in ev_genres)
         if ev.author == user.username or user_prefs_norm.intersection(ev_genres_norm):
-            if ev.latitude and ev.longitude and user_lat and user_lon:
+            if max_distance == 0:
+                filtered.append(ev.to_dict())
+            elif ev.latitude and ev.longitude and user_lat and user_lon:
                 dist = haversine(user_lat, user_lon, ev.latitude, ev.longitude)
-                if max_distance == 0 or dist <= max_distance:
+                if dist <= max_distance:
                     filtered.append(ev.to_dict())
 
     total = len(filtered)
@@ -104,12 +118,14 @@ def get_public_events():
     filtered = []
     if user_lat and user_lon and max_distance > 0:
         for ev in events:
+            if not is_upcoming_event(ev):
+                continue
             if ev.latitude and ev.longitude:
                 dist = haversine(user_lat, user_lon, ev.latitude, ev.longitude)
                 if dist <= max_distance:
                     filtered.append(ev.to_dict())
     else:
-        filtered = [ev.to_dict() for ev in events]
+        filtered = [ev.to_dict() for ev in events if is_upcoming_event(ev)]
 
     total = len(filtered)
     totalPages = max(1, (total + size - 1) // size)
@@ -143,6 +159,49 @@ def get_event(event_id):
     event_dict = event_instance.to_dict()
     event_dict["participants"] = [u.username for u in event_instance.participants]
     return event_dict, 200
+
+
+@events_bp.route("/events/mine", methods=["GET"])
+@jwt_required()
+def get_my_events():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return {"msg": "Utilisateur introuvable"}, 404
+
+    created_events = event.query.filter_by(author=user.username).all()
+    participated_events = list(user.events_participated)
+
+    combined_map = {ev.id: ev for ev in created_events}
+    for ev in participated_events:
+        combined_map[ev.id] = ev
+
+    combined_events = sorted(
+        combined_map.values(),
+        key=lambda ev: (ev.date_fin or ev.date_debut or date.min),
+        reverse=True,
+    )
+
+    participated_ids = {ev.id for ev in participated_events}
+    past_events = [ev.to_dict() for ev in combined_events if is_past_event(ev)]
+    future_events = [
+        ev.to_dict()
+        for ev in participated_events
+        if is_upcoming_event(ev)
+    ]
+    created_sorted = sorted(
+        created_events,
+        key=lambda ev: (ev.date_fin or ev.date_debut or date.min),
+        reverse=True,
+    )
+    created_dicts = [ev.to_dict() for ev in created_sorted]
+
+    return jsonify({
+        "past_events": past_events,
+        "future_events": future_events,
+        "created_events": created_dicts,
+        "participated_event_ids": list(participated_ids),
+    })
 
 
 @events_bp.route("/events/<int:event_id>/participate", methods=["POST"])

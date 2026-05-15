@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, redirect
+from flask import Blueprint, request, jsonify, redirect, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from back.extensions import db
 from back.models.user import User
@@ -69,7 +69,8 @@ def register():
     """
     try:
         mail.send(msg)
-    except Exception:
+    except Exception as e:
+        current_app.logger.warning(f"Email bienvenue non envoye: {e}")
         # Le compte reste actif meme si l'email ne peut pas etre envoye.
         pass
 
@@ -155,7 +156,8 @@ def forgot_password():
     try:
         mail.send(msg)
         return jsonify({"msg": "Si cet email existe, un lien de réinitialisation a été envoyé."}), 200
-    except Exception:
+    except Exception as e:
+        current_app.logger.warning(f"Email reset non envoye, fallback actif: {e}")
         # Fallback demo: retourner un lien direct si l'email n'est pas disponible.
         return jsonify({
             "msg": "Email indisponible sur ce serveur. Utilisez le lien direct de reinitialisation.",
