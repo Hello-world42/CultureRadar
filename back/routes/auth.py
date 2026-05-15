@@ -155,7 +155,11 @@ def forgot_password():
     """
     try:
         mail.send(msg)
-        return jsonify({"msg": "Si cet email existe, un lien de réinitialisation a été envoyé."}), 200
+        return jsonify({
+            "msg": "Si cet email existe, un lien de réinitialisation a été envoyé. En mode demo, vous pouvez aussi utiliser le lien direct ci-dessous.",
+            "reset_url": reset_url,
+            "reset_token": token
+        }), 200
     except Exception as e:
         current_app.logger.warning(f"Email reset non envoye, fallback actif: {e}")
         # Fallback demo: retourner un lien direct si l'email n'est pas disponible.

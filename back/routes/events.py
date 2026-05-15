@@ -1,5 +1,7 @@
 import math
 import random
+import re
+import requests
 from flask import Blueprint, jsonify, request
 from back.extensions import db
 from back.models.event import event
@@ -18,6 +20,15 @@ def haversine(lat1, lon1, lat2, lon2):
 
 events_bp = Blueprint("events", __name__)
 
+OA_KEY = "8a135178e6c348169f33f0bab8e1dc17"
+AGENDAS = [
+    {"uid": "2363867", "name": "Nantes"},
+    {"uid": "42448083", "name": "Toulouse"},
+    {"uid": "85319813", "name": "Rennes"},
+    {"uid": "5746", "name": "JNA Normandie"},
+    {"uid": "979472", "name": "Jardins ouverts"},
+]
+
 
 def is_upcoming_event(ev):
     reference = ev.date_fin or ev.date_debut
@@ -27,6 +38,110 @@ def is_upcoming_event(ev):
 def is_past_event(ev):
     reference = ev.date_fin or ev.date_debut
     return reference is not None and reference < date.today()
+
+
+def parse_date(date_str):
+    if not date_str:
+        return None
+    return datetime.strptime(date_str[:10], "%Y-%m-%d").date()
+
+
+def extract_price(text):
+    if not text:
+        return "Non communique"
+    match = re.search(r"(\d+)\s*euros?", text, re.IGNORECASE)
+    if match:
+        return match.group(0)
+    if "gratuit" in text.lower():
+        return "Gratuit"
+    return "Non communique"
+
+
+def extract_code_postal(location):
+    if not location:
+        return None
+    address = location.get("address") or ""
+    match = re.search(r"\b(\d{5})\b", address)
+    return match.group(1) if match else None
+
+
+def get_event_url(slug):
+    if slug:
+        return f"https://openagenda.com/{slug}"
+    return ""
+
+
+def bootstrap_openagenda_if_needed(min_upcoming_events=20):
+    upcoming_count = sum(1 for ev in event.query.all() if is_upcoming_event(ev))
+    if upcoming_count >= min_upcoming_events:
+        return {"skipped": True, "reason": "enough_events", "upcoming": upcoming_count}
+
+    imported = 0
+    for agenda in AGENDAS:
+        oa_url = f"https://api.openagenda.com/v2/agendas/{agenda['uid']}/events?key={OA_KEY}&size=200"
+        try:
+            response = requests.get(oa_url, timeout=20)
+            response.raise_for_status()
+            data = response.json()
+        except Exception:
+            continue
+
+        for ev in data.get("events", []):
+            title = ev.get("title", {}).get("fr") or ev.get("title", {}).get("en")
+            if not title:
+                continue
+
+            description = ev.get("description", {}).get("fr") or ev.get("description", {}).get("en") or ""
+
+            date_debut = parse_date(ev.get("dateRange", {}).get("begin"))
+            date_fin = parse_date(ev.get("dateRange", {}).get("end"))
+            if not date_debut and ev.get("firstTiming"):
+                date_debut = parse_date(ev["firstTiming"].get("begin"))
+            if not date_fin and ev.get("lastTiming"):
+                date_fin = parse_date(ev["lastTiming"].get("end"))
+
+            if not date_debut:
+                continue
+
+            future_reference = date_fin or date_debut
+            if future_reference < date.today():
+                continue
+
+            exists = event.query.filter_by(title=title, date_debut=date_debut).first()
+            if exists:
+                continue
+
+            cover_image = ""
+            image = ev.get("image") or {}
+            variants = image.get("variants") or []
+            if image.get("base") and variants:
+                cover_image = image["base"] + variants[0].get("filename", "")
+
+            location = ev.get("location") or {}
+            latitude = location.get("latitude")
+            longitude = location.get("longitude")
+
+            new_event = event(
+                title=title,
+                author=agenda["name"],
+                date_debut=date_debut,
+                date_fin=date_fin,
+                genres=", ".join(ev.get("keywords", {}).get("fr", [])),
+                description=description,
+                cover_image=cover_image,
+                latitude=latitude,
+                longitude=longitude,
+                prix=extract_price(description),
+                event_url=get_event_url(ev.get("slug", "")),
+                code_postal=extract_code_postal(location),
+            )
+            db.session.add(new_event)
+            imported += 1
+
+    if imported > 0:
+        db.session.commit()
+
+    return {"skipped": False, "imported": imported}
 
 
 @events_bp.route("/events", methods=["POST"])
@@ -106,6 +221,8 @@ def get_events():
 
 @events_bp.route("/events/public", methods=["GET"])
 def get_public_events():
+    bootstrap_openagenda_if_needed()
+
     max_distance = float(request.args.get("distance", 0))
     page = int(request.args.get("page", 1))
     size = int(request.args.get("size", 30))
