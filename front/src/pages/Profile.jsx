@@ -17,6 +17,10 @@ const Profile = ({ user }) => {
   const [editPostal, setEditPostal] = useState(false);
   const [postalInput, setPostalInput] = useState(user.code_postal || "");
   const [postalError, setPostalError] = useState("");
+  const [currentPlan, setCurrentPlan] = useState(
+    user.account_type || localStorage.getItem("demo_plan") || "free"
+  );
+  const [planMessage, setPlanMessage] = useState("");
 
   useEffect(() => {
     eventService.getAllGenres().then(setAllOptions);
@@ -26,6 +30,21 @@ const Profile = ({ user }) => {
   }, []);
 
   if (!user) return <p>Chargement du profil...</p>;
+
+  const getPlanLabel = (plan) => {
+    const map = {
+      free: "Gratuit",
+      premium: "Premium",
+      pro: "Pro",
+    };
+    return map[plan] || "Gratuit";
+  };
+
+  const choosePlan = (plan) => {
+    setCurrentPlan(plan);
+    localStorage.setItem("demo_plan", plan);
+    setPlanMessage(`Plan ${getPlanLabel(plan)} selectionne (mode demo).`);
+  };
 
   const handleReset = async (e) => {
     e.preventDefault();
@@ -76,6 +95,64 @@ const Profile = ({ user }) => {
         <h3 className="card-title mb-4">Profil</h3>
         <p><strong>Nom d'utilisateur :</strong> {user.username}</p>
         <p><strong>Email :</strong> {user.email}</p>
+        <div className="card mt-3 mb-4">
+          <div className="card-header">
+            <strong>Abonnement</strong>
+          </div>
+          <div className="card-body">
+            <p className="mb-3">
+              Plan actuel : <span className="badge bg-primary">{getPlanLabel(currentPlan)}</span>
+            </p>
+            <div className="row g-3">
+              <div className="col-md-4">
+                <div className="card h-100">
+                  <div className="card-body d-flex flex-column text-center">
+                    <h6>Gratuit</h6>
+                    <p className="text-muted">0 EUR / mois</p>
+                    <small className="mb-3">Consultation + 3 evenements/mois</small>
+                    <button
+                      className="btn btn-outline-secondary btn-sm mt-auto"
+                      onClick={() => choosePlan("free")}
+                    >
+                      Choisir
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="card h-100 border-primary">
+                  <div className="card-body d-flex flex-column text-center">
+                    <h6 className="text-primary">Premium</h6>
+                    <p className="text-muted">3 EUR / mois</p>
+                    <small className="mb-3">10 evenements/mois + recommandations</small>
+                    <button
+                      className="btn btn-primary btn-sm mt-auto"
+                      onClick={() => choosePlan("premium")}
+                    >
+                      Choisir
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="card h-100 border-success">
+                  <div className="card-body d-flex flex-column text-center">
+                    <h6 className="text-success">Pro</h6>
+                    <p className="text-muted">8 EUR / mois</p>
+                    <small className="mb-3">Creation illimitee + options avancees</small>
+                    <button
+                      className="btn btn-success btn-sm mt-auto"
+                      onClick={() => choosePlan("pro")}
+                    >
+                      Choisir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {planMessage && <div className="alert alert-info mt-3 mb-0">{planMessage}</div>}
+          </div>
+        </div>
         <p>
           <strong>Code postal :</strong>{" "}
           {user.code_postal || <span style={{ color: "#888" }}>Non renseigné</span>}

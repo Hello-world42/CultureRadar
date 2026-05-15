@@ -74,7 +74,7 @@ export default function RegisterStep2({ userData, setUserData, setErrors, errors
         latitude: geo.latitude,
         longitude: geo.longitude,
       });
-      navigate("/check-email");
+      navigate("/login");
     } catch (error) {
       setErrors({ global: error.msg || "Erreur lors de l'inscription" });
     }

@@ -46,8 +46,8 @@ def register():
     user = User(
         username=data["username"],
         email=data["email"],
-        is_confirmed=False,
-        confirmation_token=token,
+        is_confirmed=True,
+        confirmation_token=None,
         preferences=prefs_str,
         code_postal=data.get("code_postal"),
         latitude=data.get("latitude"),
@@ -59,22 +59,21 @@ def register():
 
     confirm_url = f"{BASE_URL}/api/confirm/{token}"
     from back.app import mail
-    msg = Message("Confirme ton email", recipients=[user.email])
+    msg = Message("Bienvenue sur CultureRadar", recipients=[user.email])
     msg.html = f"""
     <div style="font-family: Arial, sans-serif; background: #fff; color: #222; padding: 24px;">
         <h2>Bienvenue sur CultureRadar !</h2>
-        <p>Merci de t'être inscrit. Clique sur le lien ci-dessous pour confirmer ton compte :</p>
-        <p>
-            <a href="{confirm_url}" style="color: #1976d2; text-decoration: underline; font-size: 16px;">
-                Confirmer mon compte
-            </a>
-        </p>
+        <p>Ton compte est actif. Tu peux te connecter directement.</p>
         <p style="font-size:12px;color:#888;">Si tu n'es pas à l'origine de cette inscription, ignore ce message.</p>
     </div>
     """
-    mail.send(msg)
+    try:
+        mail.send(msg)
+    except Exception:
+        # Le compte reste actif meme si l'email ne peut pas etre envoye.
+        pass
 
-    return jsonify({"msg": "Utilisateur créé, vérifie tes mails pour confirmer ton compte"}), 201
+    return jsonify({"msg": "Compte cree. Vous pouvez vous connecter directement."}), 201
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -83,8 +82,6 @@ def login():
     user = User.query.filter_by(username=data["username"]).first()
     if not user or not user.check_password(data["password"]):
         return jsonify({"msg": "Identifiants invalides"}), 401
-    if not user.is_confirmed:
-        return jsonify({"msg": "Confirme d'abord ton email"}), 403
     access_token = create_access_token(identity=user.id)
     return jsonify(access_token=access_token), 200
 
@@ -155,8 +152,16 @@ def forgot_password():
         <p style="font-size:12px;color:#888;">Si tu n'as pas demandé cette action, ignore ce message.</p>
     </div>
     """
-    mail.send(msg)
-    return jsonify({"msg": "Si cet email existe, un lien de réinitialisation a été envoyé."}), 200
+    try:
+        mail.send(msg)
+        return jsonify({"msg": "Si cet email existe, un lien de réinitialisation a été envoyé."}), 200
+    except Exception:
+        # Fallback demo: retourner un lien direct si l'email n'est pas disponible.
+        return jsonify({
+            "msg": "Email indisponible sur ce serveur. Utilisez le lien direct de reinitialisation.",
+            "reset_url": reset_url,
+            "reset_token": token
+        }), 200
 
 
 @auth_bp.route("/reset-password/<token>", methods=["POST"])
