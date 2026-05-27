@@ -9,7 +9,7 @@ const ProPublish = ({ user }) => {
     <section className="legal-page">
       <h1>Publier Vos Evenements Sur CultureRadar</h1>
       <p>
-        Cette page est dediee aux acteurs B2B: entreprises, associations, salles de spectacle,
+        Cette page est dediee aux acteurs partenaires: entreprises, associations, salles de spectacle,
         festivals et institutions qui souhaitent diffuser leurs evenements aupres d'un public local.
       </p>
 
@@ -27,11 +27,21 @@ const ProPublish = ({ user }) => {
         <li>Acceder a la page d'ajout et publier vos evenements.</li>
       </ol>
 
+      <h2>Envie de creer un partenariat ?</h2>
+      <p>
+        Nous pouvons mettre en place un flux automatique pour publier vos evenements
+        (API, export planifie ou connecteur dedie).
+      </p>
+      <p>
+        Contact partenariat: <a href="mailto:partenariats@cultureradar.fr">partenariats@cultureradar.fr</a>
+        {" "}- Tel: 02 40 00 00 00
+      </p>
+
       <div className="mt-4 d-flex flex-wrap gap-2">
         {!user && (
           <>
             <Link to="/register" className="btn btn-primary">
-              Creer un compte B2B
+              Creer un compte partenaire
             </Link>
             <Link to="/login" className="btn btn-outline-primary">
               Se connecter

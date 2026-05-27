@@ -159,7 +159,6 @@ const EventCarousel = ({ user }) => {
           {suggestions[prevIndex].title}
         </div>
       )}
-      {/* Nouveau titre, animé vers l'intérieur */}
       <div
         className={`carousel-title${isSliding ? ` slide-in-${slideDirection}` : ""}`}
         style={{
@@ -180,7 +179,6 @@ const EventCarousel = ({ user }) => {
       >
         {event.title}
       </div>
-      {/* Points blancs */}
       <div
         style={{
           position: "absolute",
@@ -210,7 +208,6 @@ const EventCarousel = ({ user }) => {
         ))}
       </div>
 
-      {/* Flèche gauche */}
       <button
         style={{
           position: "absolute",
@@ -239,7 +236,6 @@ const EventCarousel = ({ user }) => {
         &#8592;
       </button>
 
-      {/* Flèche droite */}
       <button
         style={{
           position: "absolute",

@@ -113,7 +113,7 @@ const Addevent = ({ user }) => {
   if (!canPublish) {
     return (
       <div className="alert alert-warning" style={{ maxWidth: 900, margin: "0 auto" }}>
-        <h2 className="h4 mb-3">Publication réservée aux comptes B2B</h2>
+        <h2 className="h4 mb-3">Publication réservée aux comptes partenaires</h2>
         <p className="mb-2">
           Cette interface est réservée aux organisations qui publient des événements
           (entreprises, associations, salles, collectivités).
@@ -122,7 +122,7 @@ const Addevent = ({ user }) => {
           Pour publier, passez sur l'offre Pro depuis votre profil, puis revenez ici.
         </p>
         <Link to="/publier-evenements" className="btn btn-primary">
-          Voir l'espace B2B
+          Voir l'espace partenaire
         </Link>
       </div>
     );

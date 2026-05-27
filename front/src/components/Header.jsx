@@ -167,7 +167,7 @@ const Header = ({ user }) => {
             </li>
             <li className="me-3">
               <Link to="/publier-evenements" className="text-white text-decoration-none">
-                Espace B2B
+                Espace partenaire
               </Link>
             </li>
             {isLoggedIn ? (
