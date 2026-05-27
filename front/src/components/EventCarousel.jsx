@@ -14,7 +14,6 @@ const EventCarousel = ({ user }) => {
   useEffect(() => {
     eventservice.getSuggestions().then(suggestions => {
       setSuggestions(suggestions);
-      // Préchargement des images
       suggestions.forEach(ev => {
         const img = new window.Image();
         img.src = ev.cover_image;
@@ -50,7 +49,7 @@ const EventCarousel = ({ user }) => {
       setCurrent((current - 1 + suggestions.length) % suggestions.length);
       setIsSliding(false);
       setPrevIndex(null);
-    }, 300); // durée de l’animation
+    }, 300);
   };
 
   const handleNext = () => {
@@ -81,7 +80,6 @@ const EventCarousel = ({ user }) => {
         justifyContent: "center"
       }}
     >
-      {/* Ancienne image, animée vers l'extérieur */}
       {isSliding && prevIndex !== null && (
         <img
           src={suggestions[prevIndex].cover_image}
@@ -100,7 +98,6 @@ const EventCarousel = ({ user }) => {
           }}
         />
       )}
-      {/* Nouvelle image, animée vers l'intérieur */}
       {isSliding && prevIndex !== null ? (
         <img
           src={suggestions[
@@ -140,7 +137,6 @@ const EventCarousel = ({ user }) => {
           }}
         />
       )}
-      {/* Ancien titre, animé vers l'extérieur */}
       {isSliding && prevIndex !== null && (
         <div
           className={`carousel-title slide-out-${slideDirection}`}

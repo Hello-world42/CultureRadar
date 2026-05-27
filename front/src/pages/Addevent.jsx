@@ -34,7 +34,7 @@ const Addevent = ({ user }) => {
         return prev.filter((g) => g !== subcat);
       }
       if (prev.length >= 5) {
-        return prev; // ignore si déjà 5 cochées
+        return prev;
       }
       return [...prev, subcat];
     });
@@ -42,22 +42,17 @@ const Addevent = ({ user }) => {
 
   const toggleCategory = (cat) => {
     setOpenCategories((prev) => {
-      // Si la catégorie n'est pas ouverte, on l'ouvre et ferme celles sans coche
       if (!prev.includes(cat)) {
-        // Ferme toutes les catégories ouvertes sans coche
         const stillOpen = prev.filter((openCat) => {
           const hasChecked = categories[openCat]?.some((opt) => selected.includes(opt));
           return hasChecked;
         });
         return [...stillOpen, cat];
       }
-      // On vérifie s'il reste des coches
       const hasChecked = categories[cat]?.some((opt) => selected.includes(opt));
       if (hasChecked) {
-        // On ne retire pas la catégorie si elle a des coches
         return prev;
       }
-      // On peut la retirer
       return prev.filter((c) => c !== cat);
     });
   };
@@ -84,7 +79,6 @@ const Addevent = ({ user }) => {
       let geo = { latitude: null, longitude: null };
       if (event.code_postal) {
         geo = await geocodePostalCode(event.code_postal);
-        console.log("GEO:", geo);
       }
       await eventservice.createevent({
         ...event,
@@ -112,7 +106,6 @@ const Addevent = ({ user }) => {
     return { latitude: null, longitude: null };
   };
 
-  // Catégories à afficher : ouvertes ou avec au moins une coche
   const displayedCategories = Object.keys(categories).filter(
     (cat) => openCategories.includes(cat) || categories[cat].some((opt) => selected.includes(opt))
   );

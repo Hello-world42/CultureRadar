@@ -13,7 +13,7 @@ export default function ConfirmationSuccess() {
       color: "#222"
     }}>
       <h2 style={{ color: "#1976d2" }}>Email confirmé !</h2>
-      <p>Ton compte est maintenant activé.<br />Tu peux te connecter 🎉</p>
+      <p>Ton compte est maintenant activé.<br />Tu peux te connecter.</p>
     </div>
   );
 }

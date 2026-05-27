@@ -197,13 +197,13 @@ const Header = ({ user }) => {
                     className="btn btn-link"
                     style={{
                       color: "#fff",
-                      fontSize: "1.5em",
+                      fontSize: "0.9em",
                       position: "relative",
                       verticalAlign: "middle",
                       padding: 0,
                       marginTop: 2,
                       height: 32,
-                      width: 32,
+                      width: 58,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -211,10 +211,7 @@ const Header = ({ user }) => {
                     onClick={() => setShowNotif((v) => !v)}
                     aria-label="Notifications"
                   >
-                    <span role="img" aria-label="cloche">
-                      🔔
-                    </span>
-                    {/* Badge nombre de notif non lues */}
+                    Notifs
                     {notifications.filter((n) => !n.lu).length > 0 && (
                       <span
                         style={{
