@@ -23,5 +23,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:5000",
+  "devDependencies": {
+    "regenerator-transform": "^0.15.2"
+  }
 }
