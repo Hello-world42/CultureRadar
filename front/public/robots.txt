@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Pages applicatives non indexables
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /add-event
+Disallow: /mes-evenements
+Disallow: /check-email
+Disallow: /confirmation-success
+
+Sitemap: https://cultureradar.onrender.com/sitemap.xml

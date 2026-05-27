@@ -21,6 +21,13 @@ import ResetPassword from "./pages/ResetPassword";
 import CheckEmail from "./pages/CheckEmail";
 import MesEvenements from "./pages/MesEvenements";
 import Editevent from "./pages/Editevent";
+import CityLanding from "./pages/CityLanding";
+import Accessibilite from "./pages/Accessibilite";
+import BlogSortiesAccessiblesNantes from "./pages/BlogSortiesAccessiblesNantes";
+import BlogSortiesAccessiblesRennes from "./pages/BlogSortiesAccessiblesRennes";
+import BlogSortiesAccessiblesToulouse from "./pages/BlogSortiesAccessiblesToulouse";
+import BlogAccessibiliteGuideGlobal from "./pages/BlogAccessibiliteGuideGlobal";
+import CategoryLanding from "./pages/CategoryLanding";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -57,6 +64,29 @@ function App() {
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
           <Route path="/" element={<Home user={user} />} />
+          <Route path="/nantes" element={<CityLanding cityKey="nantes" />} />
+          <Route path="/rennes" element={<CityLanding cityKey="rennes" />} />
+          <Route path="/toulouse" element={<CityLanding cityKey="toulouse" />} />
+          <Route path="/:city/concerts" element={<CategoryLanding />} />
+          <Route path="/:city/expositions" element={<CategoryLanding />} />
+          <Route path="/:city/theatre" element={<CategoryLanding />} />
+          <Route path="/accessibilite" element={<Accessibilite />} />
+          <Route
+            path="/blog/accessibilite-culture-guide-complet"
+            element={<BlogAccessibiliteGuideGlobal />}
+          />
+          <Route
+            path="/blog/sorties-accessibles-nantes-guide-complet"
+            element={<BlogSortiesAccessiblesNantes />}
+          />
+          <Route
+            path="/blog/sorties-accessibles-rennes-guide-complet"
+            element={<BlogSortiesAccessiblesRennes />}
+          />
+          <Route
+            path="/blog/sorties-accessibles-toulouse-guide-complet"
+            element={<BlogSortiesAccessiblesToulouse />}
+          />
           <Route path="/events/:id" element={<EventDetail user={user} />} />
           <Route
             path="/add-event"

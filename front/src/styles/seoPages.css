@@ -1,0 +1,56 @@
+.seo-page {
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+.seo-hero {
+  background: linear-gradient(135deg, #f2f7ff 0%, #ffffff 100%);
+  border: 1px solid #d8e8ff;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.seo-kicker {
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #2156a5;
+  margin-bottom: 0.35rem;
+}
+
+.seo-page h1,
+.seo-page h2,
+.seo-page h3 {
+  color: #0f2747;
+}
+
+.seo-page h1 {
+  font-size: 1.9rem;
+  margin-bottom: 0.7rem;
+}
+
+.seo-page h2 {
+  font-size: 1.35rem;
+  margin-bottom: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.seo-page h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.35rem;
+  margin-top: 0.9rem;
+}
+
+.seo-page p,
+.seo-page li {
+  color: #1f2b3d;
+}
+
+.cta-box {
+  border: 1px solid #bed8ff;
+  background: #eff6ff;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+}
