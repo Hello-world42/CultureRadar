@@ -2,6 +2,7 @@
   max-width: 900px;
   margin: 0 auto;
   line-height: 1.65;
+  color: #1f2b3d;
 }
 
 .seo-hero {
@@ -46,6 +47,23 @@
 .seo-page p,
 .seo-page li {
   color: #1f2b3d;
+}
+
+.seo-page section {
+  background: #ffffff;
+  border: 1px solid #d8e8ff;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 6px 18px rgba(7, 25, 55, 0.06);
+}
+
+.seo-page a {
+  color: #0059d6;
+  font-weight: 600;
+}
+
+.seo-page a:hover {
+  color: #0f2747;
 }
 
 .cta-box {

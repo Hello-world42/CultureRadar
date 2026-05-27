@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   deleteNotification,
@@ -9,8 +9,69 @@ import {
 const Header = ({ user }) => {
   const [showNotif, setShowNotif] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
   const isLoggedIn = !!user;
+
+  const searchTargets = useMemo(
+    () => [
+      { label: "Ville Nantes", path: "/nantes", keywords: ["nantes", "ville nantes"] },
+      { label: "Ville Rennes", path: "/rennes", keywords: ["rennes", "ville rennes"] },
+      { label: "Ville Toulouse", path: "/toulouse", keywords: ["toulouse", "ville toulouse"] },
+      { label: "Accessibilité", path: "/accessibilite", keywords: ["accessibilite", "pmr", "handicap"] },
+      {
+        label: "Blog accessibilité global",
+        path: "/blog/accessibilite-culture-guide-complet",
+        keywords: ["blog", "accessibilite", "guide global"],
+      },
+      {
+        label: "Blog Nantes accessible",
+        path: "/blog/sorties-accessibles-nantes-guide-complet",
+        keywords: ["blog nantes", "sorties accessibles nantes"],
+      },
+      {
+        label: "Blog Rennes accessible",
+        path: "/blog/sorties-accessibles-rennes-guide-complet",
+        keywords: ["blog rennes", "sorties accessibles rennes"],
+      },
+      {
+        label: "Blog Toulouse accessible",
+        path: "/blog/sorties-accessibles-toulouse-guide-complet",
+        keywords: ["blog toulouse", "sorties accessibles toulouse"],
+      },
+      { label: "Concerts Nantes", path: "/nantes/concerts", keywords: ["concert", "concerts"] },
+      { label: "Expositions Nantes", path: "/nantes/expositions", keywords: ["expo", "expositions"] },
+      { label: "Théâtre Nantes", path: "/nantes/theatre", keywords: ["theatre", "théâtre"] },
+    ],
+    []
+  );
+
+  const filteredTargets = useMemo(() => {
+    const q = searchValue.trim().toLowerCase();
+    if (!q) {
+      return searchTargets.slice(0, 6);
+    }
+    return searchTargets
+      .filter((item) => {
+        const haystack = `${item.label} ${item.keywords.join(" ")}`.toLowerCase();
+        return haystack.includes(q);
+      })
+      .slice(0, 6);
+  }, [searchTargets, searchValue]);
+
+  const goToTarget = (path) => {
+    setShowSuggestions(false);
+    setSearchValue("");
+    navigate(path);
+  };
+
+  const onSearchSubmit = (e) => {
+    e.preventDefault();
+    if (filteredTargets.length > 0) {
+      goToTarget(filteredTargets[0].path);
+    }
+  };
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -33,6 +94,63 @@ const Header = ({ user }) => {
         </Link>
         <nav>
           <ul className="list-unstyled d-flex m-0" style={{ alignItems: "center" }}>
+            <li className="me-3" style={{ position: "relative" }}>
+              <form onSubmit={onSearchSubmit} className="d-flex" role="search">
+                <input
+                  type="search"
+                  value={searchValue}
+                  onChange={(e) => {
+                    setSearchValue(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  placeholder="Recherche: Nantes, concert, blog..."
+                  className="form-control form-control-sm"
+                  style={{ width: 260 }}
+                  aria-label="Recherche pages SEO"
+                />
+                <button type="submit" className="btn btn-sm btn-outline-light ms-2">
+                  Aller
+                </button>
+              </form>
+              {showSuggestions && filteredTargets.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 36,
+                    left: 0,
+                    width: 320,
+                    zIndex: 1100,
+                    background: "#fff",
+                    color: "#1f2b3d",
+                    border: "1px solid #d4dded",
+                    borderRadius: 8,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+                    overflow: "hidden",
+                  }}
+                >
+                  {filteredTargets.map((item) => (
+                    <button
+                      key={item.path}
+                      type="button"
+                      onClick={() => goToTarget(item.path)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        background: "transparent",
+                        border: "none",
+                        padding: "0.55rem 0.7rem",
+                        borderBottom: "1px solid #eef3ff",
+                        color: "#163055",
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </li>
             <li className="me-3">
               <Link to="/" className="text-white text-decoration-none">
                 Accueil
