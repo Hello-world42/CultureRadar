@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import eventservice from "../services/eventService";
+import { isProAccount } from "../utils/accountType";
 
 const Addevent = ({ user }) => {
   const navigate = useNavigate();
+  const canPublish = isProAccount(user);
 
   const [event, setevent] = useState({
     title: "",
@@ -114,6 +116,24 @@ const Addevent = ({ user }) => {
   const displayedCategories = Object.keys(categories).filter(
     (cat) => openCategories.includes(cat) || categories[cat].some((opt) => selected.includes(opt))
   );
+
+  if (!canPublish) {
+    return (
+      <div className="alert alert-warning" style={{ maxWidth: 900, margin: "0 auto" }}>
+        <h2 className="h4 mb-3">Publication réservée aux comptes B2B</h2>
+        <p className="mb-2">
+          Cette interface est réservée aux organisations qui publient des événements
+          (entreprises, associations, salles, collectivités).
+        </p>
+        <p className="mb-3">
+          Pour publier, passez sur l'offre Pro depuis votre profil, puis revenez ici.
+        </p>
+        <Link to="/publier-evenements" className="btn btn-primary">
+          Voir l'espace B2B
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div>

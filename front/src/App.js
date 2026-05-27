@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import CookieBanner from "./components/CookieBanner";
 import Home from "./pages/Home";
 import EventDetail from "./pages/eventDetail";
 import Profile from "./pages/Profile";
@@ -28,6 +29,7 @@ import BlogSortiesAccessiblesRennes from "./pages/BlogSortiesAccessiblesRennes";
 import BlogSortiesAccessiblesToulouse from "./pages/BlogSortiesAccessiblesToulouse";
 import BlogAccessibiliteGuideGlobal from "./pages/BlogAccessibiliteGuideGlobal";
 import CategoryLanding from "./pages/CategoryLanding";
+import ProPublish from "./pages/ProPublish";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -71,6 +73,7 @@ function App() {
           <Route path="/:city/expositions" element={<CategoryLanding />} />
           <Route path="/:city/theatre" element={<CategoryLanding />} />
           <Route path="/accessibilite" element={<Accessibilite />} />
+          <Route path="/publier-evenements" element={<ProPublish user={user} />} />
           <Route
             path="/blog/accessibilite-culture-guide-complet"
             element={<BlogAccessibiliteGuideGlobal />}
@@ -112,6 +115,7 @@ function App() {
           <Route path="/events/:id/edit" element={<Editevent user={user} />} />
         </Routes>
       </main>
+      {!isAuthPage && <CookieBanner />}
       {!isAuthPage && <Footer />}
     </div>
   );

@@ -9,6 +9,7 @@ from back.models.user import User
 from back.models.notification import Notification
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, date
+from sqlalchemy import text
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371
@@ -145,7 +146,17 @@ def bootstrap_openagenda_if_needed(min_upcoming_events=20):
 
 
 @events_bp.route("/events", methods=["POST"])
+@jwt_required()
 def create_event():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return {"msg": "Utilisateur introuvable"}, 404
+
+    account_type = request.headers.get("X-Account-Type", "free")
+    if account_type != "pro":
+        return {"msg": "La publication d'evenements est reservee aux comptes B2B Pro"}, 403
+
     data = request.get_json()
     # Conversion des dates
     date_debut = None
@@ -157,7 +168,7 @@ def create_event():
             date_fin = datetime.strptime(data["date_fin"], "%Y-%m-%d").date()
     event_instance = event(
         title=data.get("title"),
-        author=data.get("author"),
+        author=user.username,
         date_debut=date_debut,
         date_fin=date_fin,
         genres=",".join(data.get("genres", [])),
@@ -172,6 +183,18 @@ def create_event():
     db.session.add(event_instance)
     db.session.commit()
     return jsonify({"success": True, "id": event_instance.id})
+
+
+def ensure_participation_meta_table():
+    db.session.execute(text("""
+        CREATE TABLE IF NOT EXISTS participation_meta (
+            user_id INTEGER NOT NULL,
+            event_id INTEGER NOT NULL,
+            seats INTEGER NOT NULL DEFAULT 1,
+            PRIMARY KEY (user_id, event_id)
+        )
+    """))
+    db.session.commit()
 
 
 @events_bp.route("/events", methods=["GET"])
@@ -270,11 +293,25 @@ def delete_event(id):
 
 @events_bp.route("/events/<int:event_id>", methods=["GET"])
 def get_event(event_id):
+    ensure_participation_meta_table()
     event_instance = event.query.get(event_id)
     if not event_instance:
         return {"msg": "Événement non trouvé"}, 404
+    seat_rows = db.session.execute(
+        text("SELECT user_id, seats FROM participation_meta WHERE event_id = :event_id"),
+        {"event_id": event_id},
+    ).fetchall()
+    seats_by_user = {row.user_id: row.seats for row in seat_rows}
     event_dict = event_instance.to_dict()
-    event_dict["participants"] = [u.username for u in event_instance.participants]
+    participant_details = []
+    for u in event_instance.participants:
+        seats = seats_by_user.get(u.id, 1)
+        participant_details.append({"username": u.username, "seats": seats})
+    event_dict["participants_details"] = participant_details
+    event_dict["participants"] = [
+        f"{p['username']} (x{p['seats']})" if p["seats"] > 1 else p["username"]
+        for p in participant_details
+    ]
     return event_dict, 200
 
 
@@ -324,14 +361,36 @@ def get_my_events():
 @events_bp.route("/events/<int:event_id>/participate", methods=["POST"])
 @jwt_required()
 def participate_event(event_id):
+    ensure_participation_meta_table()
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     event_instance = event.query.get(event_id)
     if not user or not event_instance:
         return {"msg": "Utilisateur ou événement introuvable"}, 404
+    data = request.get_json(silent=True) or {}
+    seats = int(data.get("seats", 1))
+    seats = max(1, min(seats, 20))
+
     if event_instance in user.events_participated:
-        return {"msg": "Déjà inscrit à cet événement"}, 400
+        db.session.execute(
+            text("""
+                UPDATE participation_meta
+                SET seats = :seats
+                WHERE user_id = :user_id AND event_id = :event_id
+            """),
+            {"seats": seats, "user_id": user.id, "event_id": event_instance.id},
+        )
+        db.session.commit()
+        return {"msg": "Nombre de participants mis à jour"}, 200
+
     user.events_participated.append(event_instance)
+    db.session.execute(
+        text("""
+            INSERT INTO participation_meta (user_id, event_id, seats)
+            VALUES (:user_id, :event_id, :seats)
+        """),
+        {"user_id": user.id, "event_id": event_instance.id, "seats": seats},
+    )
     db.session.commit()
     return {"msg": "Participation enregistrée"}, 200
 
@@ -339,6 +398,7 @@ def participate_event(event_id):
 @events_bp.route("/events/<int:event_id>/unparticipate", methods=["POST"])
 @jwt_required()
 def unparticipate_event(event_id):
+    ensure_participation_meta_table()
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     event_instance = event.query.get(event_id)
@@ -347,6 +407,10 @@ def unparticipate_event(event_id):
     if event_instance not in user.events_participated:
         return {"msg": "Pas inscrit à cet événement"}, 400
     user.events_participated.remove(event_instance)
+    db.session.execute(
+        text("DELETE FROM participation_meta WHERE user_id = :user_id AND event_id = :event_id"),
+        {"user_id": user.id, "event_id": event_instance.id},
+    )
     db.session.commit()
     return {"msg": "Participation annulée"}, 200
 

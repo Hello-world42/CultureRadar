@@ -11,9 +11,11 @@ const api = axios.create({
 // Automatically add the JWT token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+  const accountType = localStorage.getItem("demo_plan") || "free";
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  config.headers["X-Account-Type"] = accountType;
   return config;
 });
 

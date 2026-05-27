@@ -5,6 +5,7 @@ import {
   getNotifications,
   markAsRead,
 } from "../services/notificationService";
+import { isProAccount } from "../utils/accountType";
 
 const Header = ({ user }) => {
   const [showNotif, setShowNotif] = useState(false);
@@ -13,6 +14,7 @@ const Header = ({ user }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
   const isLoggedIn = !!user;
+  const isPro = isProAccount(user);
 
   const searchTargets = useMemo(
     () => [
@@ -88,12 +90,19 @@ const Header = ({ user }) => {
 
   return (
     <header className="bg-dark text-white p-3">
-      <div className="container d-flex justify-content-between align-items-center">
-        <Link to="/" className="text-white text-decoration-none">
-          <h1 className="h3 m-0">Capsule Culture</h1>
-        </Link>
-        <nav>
-          <ul className="list-unstyled d-flex m-0" style={{ alignItems: "center" }}>
+      <div className="container-fluid">
+        <div className="row align-items-center g-2">
+          <div className="col-12 col-xl-3 text-center text-xl-start">
+            <Link to="/" className="text-white text-decoration-none">
+              <h1 className="h3 m-0">Capsule Culture</h1>
+            </Link>
+          </div>
+          <div className="col-12 col-xl-9 d-flex justify-content-center">
+            <nav>
+              <ul
+                className="list-unstyled d-flex m-0 flex-wrap justify-content-center"
+                style={{ alignItems: "center", gap: "0.25rem 0.35rem" }}
+              >
             <li className="me-3" style={{ position: "relative" }}>
               <form onSubmit={onSearchSubmit} className="d-flex" role="search">
                 <input
@@ -156,16 +165,23 @@ const Header = ({ user }) => {
                 Accueil
               </Link>
             </li>
+            <li className="me-3">
+              <Link to="/publier-evenements" className="text-white text-decoration-none">
+                Espace B2B
+              </Link>
+            </li>
             {isLoggedIn ? (
               <>
-                <li className="me-3">
-                  <Link
-                    to="/add-event"
-                    className="text-white text-decoration-none"
-                  >
-                    Ajouter un évent
-                  </Link>
-                </li>
+                {isPro && (
+                  <li className="me-3">
+                    <Link
+                      to="/add-event"
+                      className="text-white text-decoration-none"
+                    >
+                      Ajouter un évent
+                    </Link>
+                  </li>
+                )}
                 <li className="me-3">
                   <Link to="/profile" className="text-white text-decoration-none">
                     Profil
@@ -308,8 +324,10 @@ const Header = ({ user }) => {
                 </li>
               </>
             )}
-          </ul>
-        </nav>
+              </ul>
+            </nav>
+          </div>
+        </div>
       </div>
     </header>
   );

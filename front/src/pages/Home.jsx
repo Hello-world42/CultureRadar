@@ -38,11 +38,17 @@ const Home = ({ user }) => {
       {!user && (
         <div className="alert alert-info mb-4">
           <h4>Bienvenue sur CultureRadar !</h4>
+          <p className="mb-2">
+            Vous êtes en mode visiteur. Découvrez des événements culturels près de chez vous,
+            puis
+            <Link to="/login" className="alert-link"> connectez-vous</Link> ou
+            <Link to="/register" className="alert-link"> créez un compte</Link>
+            pour recevoir des recommandations personnalisées et vous inscrire aux événements.
+          </p>
           <p className="mb-0">
-            Vous etes en mode visiteur. Vous pouvez parcourir les evenements, puis
-            <Link to="/login" className="alert-link"> vous connecter</Link> ou
-            <Link to="/register" className="alert-link"> creer un compte</Link>
-            pour des recommandations personnalisees et vous inscrire aux evenements.
+            Vous êtes une entreprise, une association ou un lieu culturel ?
+            <Link to="/publier-evenements" className="alert-link"> Accédez à l'espace B2B</Link>
+            pour publier vos événements et toucher une audience locale.
           </p>
         </div>
       )}

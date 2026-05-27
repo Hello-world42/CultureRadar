@@ -8,6 +8,7 @@ const EventDetail = ({ user }) => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [error, setError] = useState(null);
+  const [seats, setSeats] = useState(1);
 
   useEffect(() => {
     eventservice.geteventById(id)
@@ -19,7 +20,7 @@ const EventDetail = ({ user }) => {
 
   const handleParticipate = async (eventId) => {
     try {
-      await eventservice.participate(eventId);
+      await eventservice.participate(eventId, seats);
       alert("Participation enregistrée !");
       window.location.reload();
     } catch (e) {
@@ -86,12 +87,26 @@ const EventDetail = ({ user }) => {
               Je ne participe plus...
             </button>
           ) : (
-            <button
-              className="btn btn-success mt-3 w-100"
-              onClick={() => handleParticipate(event.id)}
-            >
-              Je participe !
-            </button>
+            <>
+              <label className="form-label mt-3 mb-1" htmlFor="seats-count">
+                Nombre de personnes
+              </label>
+              <input
+                id="seats-count"
+                type="number"
+                min={1}
+                max={20}
+                className="form-control"
+                value={seats}
+                onChange={(e) => setSeats(Math.max(1, Math.min(20, Number(e.target.value) || 1)))}
+              />
+              <button
+                className="btn btn-success mt-3 w-100"
+                onClick={() => handleParticipate(event.id)}
+              >
+                Je participe !
+              </button>
+            </>
           )}
           {user?.username === event.author && (
             <button

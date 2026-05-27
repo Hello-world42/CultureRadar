@@ -29,8 +29,8 @@ const eventservice = {
     return res.data;
   },
 
-  participate: async (eventId) => {
-    return api.post(`/events/${eventId}/participate`);
+  participate: async (eventId, seats = 1) => {
+    return api.post(`/events/${eventId}/participate`, { seats });
   },
   unparticipate: async (eventId) => {
     return api.post(`/events/${eventId}/unparticipate`);
